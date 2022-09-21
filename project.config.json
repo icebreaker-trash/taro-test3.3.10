@@ -2,7 +2,7 @@
   "miniprogramRoot": "./dist",
   "projectname": "taro_thin_temp_ts",
   "description": "轻量taro模板",
-  "appid": "touristappid",
+  "appid": "wx5e4f082fe81ab9aa",
   "setting": {
     "urlCheck": true,
     "es6": false,

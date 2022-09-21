@@ -1,3 +1,6 @@
+import path from 'path'
+import { TaroWeappTailwindcssWebpackPluginV4 } from 'weapp-tailwindcss-webpack-plugin'
+
 const config = {
   projectName: 'taro_thin_temp_ts',
   date: '2022-9-20',
@@ -8,18 +11,32 @@ const config = {
     828: 1.81 / 2
   },
   sourceRoot: 'src',
-  outputRoot: 'dist',
-  plugins: [],
+  outputRoot: `dist/${process.env.TARO_ENV}`,
+  alias: {
+    '@': path.resolve(__dirname, '..', 'src'),
+    '~@': path.resolve(__dirname, '..', 'src'),
+  },
   defineConstants: {
   },
+  plugins: [
+    // ['@tarojs/plugin-react-devtools'],
+    // ['@tarojs/plugin-html', {}], // 解析html
+    // 'taro-plugin-compiler-optimization',
+    // ['@dcasia/mini-program-tailwind-webpack-plugin/dist/taro', { }]
+  ],
   copy: {
     patterns: [
+      { from: 'src/subPackage/static/common/', to: `dist/${process.env.TARO_ENV}/staticCommon/`, ignore: ['*.js'] }, // 指定需要 copy 的目录
     ],
     options: {
     }
   },
+  sass: {
+    resource: [path.resolve(__dirname, '..', 'src/static/scss/index.scss')]
+  },
   framework: 'react',
   mini: {
+    debugReact: true, // 错误提示就没有map文件
     postcss: {
       pxtransform: {
         enable: true,
@@ -40,11 +57,62 @@ const config = {
           generateScopedName: '[name]__[local]___[hash:base64:5]'
         }
       }
-    }
+    },
+    // 开启分包 分包把common放到自己的分包
+    optimizeMainPackage: {
+      enable: true,
+      // 排除某个文件  把这个分包文件放到主包
+      // exclude: [
+      //   path.resolve(__dirname, '..', 'src/subMap/components/echarts-taro3-react/ec-canvas/echarts.min.js')
+      // ]
+    },
+    webpackChain(chain, webpack) {
+      chain.merge({
+        // optimization: {
+        //   minimize: true
+        // },
+        plugin: {
+          install: {
+            plugin: TaroWeappTailwindcssWebpackPluginV4,
+            args: [
+              {
+                // 注意这一行(不传默认 react)
+                framework: 'react' // 'vue2' / 'vue3'
+              }
+            ]
+          }
+        }
+      })
+    },
   },
   h5: {
+    devServer: {
+      compress: true,
+      // host: 'abc.cc.com',
+      host: 'wrjbs.szhuitianxia.com',
+      // 这个才是有效
+      public: 'wrjbs.szhuitianxia.com:80',
+      disableHostCheck: true,
+      port: 80,
+      open: false,
+      sockHost: 'wrjbs.szhuitianxia.com',
+      sockPort: 80
+    },
+    router: {
+      mode: 'browser' // 或者是 'browser' 'hash'
+    },
+    esnextModules: ["@taroify"],
+    // publicPath: process.env.NODE_ENV === "development" ? "/" : "/taroify.com/h5",
     publicPath: '/',
-    staticDirectory: 'static',
+    staticDirectory: "static",
+    // output: {
+    //   filename: "js/[name].[hash:8].js",
+    //   chunkFilename: "chunk/[name].[chunkhash:8].js",
+    // },
+    // miniCssExtractPluginOption: {
+    //   filename: "css/[name].[hash:8].css",
+    //   chunkFilename: "chunk/[name].[chunkhash:8].css",
+    // },
     postcss: {
       autoprefixer: {
         enable: true,

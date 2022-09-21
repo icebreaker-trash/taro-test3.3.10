@@ -21,7 +21,21 @@
     "typeRoots": [
       "node_modules/@types",
       "global.d.ts"
-    ]
+    ],
+    "paths": {
+      "@/components/*": ["src/components/*"],
+      "Components/*": ["src/components/*"],
+      "@/utils/*": ["src/utils/*"],
+      "Utils/*": ["src/utils/*"],
+      "@/service/*": ["src/service/*"],
+      "Service/*": ["src/service/*"],
+      "@/assets/*": ["src/assets/*"],
+      "@/config/*": ["src/config/*"],
+      "@/plugins/*": ["src/plugins/*"],
+      "@/routers/*": ["src/routers/*"],
+      "@/directives/*": ["src/directives/*"],
+      "@/*": ["src/*"]
+    }
   },
   "exclude": [
     "node_modules",
