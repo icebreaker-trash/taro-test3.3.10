@@ -86,7 +86,7 @@ const Index: React.FC<Props> = ({ user }) => {
   }
 
   function getNewsDetailAction() {
-    $api.getNewsDetail({ news_id: 35 }).then(res => {
+    $api.getNewsDetail({ news_id: 33 }).then(res => {
       if (!res) {
         return
       }

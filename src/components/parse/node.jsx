@@ -1,4 +1,4 @@
-import { List , Image } from "@antmjs/vantui";
+import { List, Image } from "@antmjs/vantui";
 import { View, Block, Text, Video, Audio, RichText } from "@tarojs/components";
 
 import Taro from "@tarojs/taro";
@@ -27,14 +27,12 @@ function Node({
       });
   }
   function imgTap(item) {
-    console.log(item, 'item')
-    console.log(imgs, 'imgs')
-    // const images = imgs.map((t) => t.attrs?.src);
-    // const index = images.findIndex((t) => t === item.attrs.src);
-    // Taro.previewImage({
-    //   current: item.attrs.src, // 当前显示图片的http链接
-    //   urls: images,
-    // });
+    const images = imgs.map((t) => t.attrs?.src);
+    const index = images.findIndex((t) => t === item.attrs.src);
+    Taro.previewImage({
+      current: item.attrs.src, // 当前显示图片的http链接
+      urls: images,
+    });
   }
   function linkTap(e) {
     const attrs = e.attrs || e;
@@ -68,11 +66,52 @@ function Node({
   }
 
   // render
-
+  // 行内标签列表
+  var inlineTags = {
+    abbr: true,
+    b: true,
+    big: true,
+    code: true,
+    del: true,
+    em: true,
+    i: true,
+    ins: true,
+    label: true,
+    q: true,
+    small: true,
+    span: true,
+    strong: true,
+    sub: true,
+    sup: true
+  }
+  function handleUse(item) {
+    // 微信和 QQ 的 rich-text inline 布局无效
+    if (inlineTags[item.name] || (item.attrs.style || '').indexOf('display:inline') != -1)
+      return false
+    return !item.c
+  }
 
   // for 循环的block渲染
   function forBlockRender(n, i) {
     return (
+      // <Block key={i}>
+      //   {
+      //     n.name === "img" ? renderImage(n)
+      //       : (n.text ? renderText(n)
+      //         : (n.name === "br" ? <View style={{ padding: '10px' }}><br /></View>
+      //           : (n.name === "a" ? renderA(n, i)
+      //             : (n.name === "video" ? renderVideo(n, i)
+      //               : (n.name === "audio" ? renderAudio(n, i)
+      //                 : n.name === "table" && n.c ? renderTable(n, i)
+      //                   : n.c === 2 ? renderC2Action(n, i)
+      //                     : lastRenderNode(n, i)
+      //               )
+      //             )
+      //           )
+      //         )
+      //       )
+      //   }
+      // </Block>
       <Block key={i}>
         {
           n.name === "img" ? renderImage(n)
@@ -82,7 +121,18 @@ function Node({
                   : (n.name === "video" ? renderVideo(n, i)
                     : (n.name === "audio" ? renderAudio(n, i)
                       : n.name === "table" && n.c ? renderTable(n, i)
-                        : n.c === 2 ? renderC2Action(n, i) : lastRenderNode(n, i))
+                        : n.c === 2 ? renderC2Action(n, i)
+                          : handleUse(n) ? <RichText id={n.attrs.id} style={n.f} nodes={[n]}></RichText>
+                            : !n.c ? <RichText id={n.attrs.id} style={n.f + ';display:inline'} preview={false} nodes={[n]}></RichText>
+                              : n.c == 2 ? <View id={n.attrs.id} class={'_' + n.name + n.attrs.class} style={n.f + ';' + n.attrs.style}>
+                                {
+                                  n.children.map((n2, j) => (
+                                    <Node key={j} style={n2.f} name={n2.name} attrs={n2.attrs} childs={n2.children} opts={opts} />
+                                  ))
+                                }
+                              </View>
+                                : lastRenderNode(n, i)
+                    )
                   )
                 )
               )
@@ -98,7 +148,7 @@ function Node({
       style={(ctrl[i] === -1 ? "display:none;" : "") + n.attrs.style}
       src={n.attrs.src || (ctrl.load ? n.attrs["data-src"] : "")}
       data-i={i}
-      fit={n.h?'':'widthFix'}
+      fit={n.h ? '' : 'widthFix'}
       onLoad={imgLoad}
       onError={(e) => mediaError(e, n)}
       onClick={() => imgTap(n)}
@@ -140,6 +190,7 @@ function Node({
         childs={n.children}
         opts={opts}
         style='display: inherit'
+        imgs={imgs}
       />
     </Text>
   }
@@ -162,7 +213,7 @@ function Node({
   function renderTable(n) {
     return <Block>
       {n.name === "li" ? (
-        <Node childs={n.children} opts={opts} />
+        <Node childs={n.children} opts={opts} imgs={imgs} />
       ) : (
         <View
           className={"_" + tbody.name + " " + tbody.attrs.class}
@@ -171,7 +222,7 @@ function Node({
           {n.children.map((tbody, x) => (
             <>
               {tbody.name === "td" || tbody.name === "th" ? (
-                <Node childs={tbody.children} opts={opts}></Node>
+                <Node childs={tbody.children} opts={opts} imgs={imgs}></Node>
               ) : (
                 <>
                   {tbody.children.map((tr, y) => (
@@ -183,7 +234,7 @@ function Node({
                           }
                           style={tr.attrs.style}
                         >
-                          <Node childs={tr.children} opts={opts} />
+                          <Node childs={tr.children} opts={opts} imgs={imgs} />
                         </View>
                       ) : (
                         <View
@@ -202,6 +253,7 @@ function Node({
                               <Node
                                 childs={td.children}
                                 opts={opts}
+                                imgs={imgs}
                               />
                             </View>
                           ))}
@@ -231,6 +283,7 @@ function Node({
           attrs={n2.attrs}
           childs={n2.children}
           opts={opts}
+          imgs={imgs}
         />
       ))}
     </View>
@@ -242,6 +295,7 @@ function Node({
       attrs={n.attrs}
       childs={n.children}
       opts={opts}
+      imgs={imgs}
     />
   }
   return (
