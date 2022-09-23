@@ -16,6 +16,8 @@
  * @fileoverview html 解析器
  */
 import Taro from '@tarojs/taro'
+
+const ENV = Taro.getEnv()
 // 配置
 const config = {
   // 信任的标签（保持标签名不变）
@@ -23,11 +25,6 @@ const config = {
 
   // 块级标签（转为 div，其他的非信任标签转为 span）
   blockTags: makeMap('address,article,aside,body,caption,center,cite,footer,header,html,nav,pre,section'),
-
-  // #ifdef (MP-WEIXIN || MP-QQ || APP-PLUS || MP-360) && VUE3
-  // 行内标签
-  inlineTags: makeMap('abbr,b,big,code,del,em,i,ins,label,q,small,span,strong,sub,sup'),
-  // #endif
 
   // 要移除的标签
   ignoreTags: makeMap('area,base,canvas,embed,frame,head,iframe,input,link,map,meta,param,rp,script,source,style,textarea,title,track,wbr'),
@@ -61,8 +58,25 @@ const config = {
   },
 
   // 默认的标签样式
-  tagStyle: {
-    // #ifndef APP-PLUS-NVUE
+  tagStyle: {},
+
+  // svg 大小写对照表
+  svgDict: {
+    animatetransform: 'animateTransform',
+    lineargradient: 'linearGradient',
+    viewbox: 'viewBox',
+    attributename: 'attributeName',
+    repeatcount: 'repeatCount',
+    repeatdur: 'repeatDur'
+  }
+}
+if (ENV === Taro.ENV_TYPE.WEAPP || ENV === Taro.ENV_TYPE.QQ || ENV === Taro.ENV_TYPE.RN) {
+  // 行内标签
+  config.inlineTags = makeMap('abbr,b,big,code,del,em,i,ins,label,q,small,span,strong,sub,sup')
+}
+if (ENV === Taro.ENV_TYPE.RN) {
+  // // 默认的标签样式
+  config.tagStyle = {
     address: 'font-style:italic',
     big: 'display:inline;font-size:1.2em',
     caption: 'display:table-caption;text-align:center',
@@ -75,17 +89,6 @@ const config = {
     small: 'display:inline;font-size:0.8em',
     strike: 'text-decoration:line-through',
     u: 'text-decoration:underline'
-    // #endif
-  },
-
-  // svg 大小写对照表
-  svgDict: {
-    animatetransform: 'animateTransform',
-    lineargradient: 'linearGradient',
-    viewbox: 'viewBox',
-    attributename: 'attributeName',
-    repeatcount: 'repeatCount',
-    repeatdur: 'repeatDur'
   }
 }
 const tagSelector = {}
@@ -94,22 +97,22 @@ const { windowWidth } = Taro.getSystemInfoSync()
 const blankChar = makeMap(' ,\r,\n,\t,\f')
 let idIndex = 0
 
-// #ifdef H5 || APP-PLUS
-config.ignoreTags.iframe = undefined
-config.trustTags.iframe = true
-config.ignoreTags.embed = undefined
-config.trustTags.embed = true
-// #endif
-// #ifdef APP-PLUS-NVUE
-config.ignoreTags.source = undefined
-config.ignoreTags.style = undefined
-// #endif
+if (ENV === Taro.ENV_TYPE.WEB || ENV === Taro.ENV_TYPE.RN) {
+  config.ignoreTags.iframe = undefined
+  config.trustTags.iframe = true
+  config.ignoreTags.embed = undefined
+  config.trustTags.embed = true
+}
+if (ENV === Taro.ENV_TYPE.RN) {
+  config.ignoreTags.source = undefined
+  config.ignoreTags.style = undefined
+}
 
 /**
  * @description 创建 map
  * @param {String} str 逗号分隔
  */
-function makeMap (str) {
+function makeMap(str) {
   const map = Object.create(null)
   const list = str.split(',')
   for (let i = list.length; i--;) {
@@ -124,7 +127,7 @@ function makeMap (str) {
  * @param {Boolean} amp 要不要解码 &amp;
  * @returns {String} 解码后的字符串
  */
-function decodeEntity (str, amp) {
+function decodeEntity(str, amp) {
   let i = str.indexOf('&')
   while (i !== -1) {
     const j = str.indexOf(';', i + 3)
@@ -152,7 +155,7 @@ function decodeEntity (str, amp) {
  * @description html 解析器
  * @param {Object} vm 组件实例
  */
-function Parser (vm) {
+function Parser(vm) {
   this.options = vm || {}
   this.tagStyle = Object.assign({}, config.tagStyle, this.options.tagStyle)
   this.imgList = vm.imgList || []
@@ -187,13 +190,13 @@ Parser.prototype.parse = function (content) {
  * @description 将标签暴露出来（不被 rich-text 包含）
  */
 Parser.prototype.expose = function () {
-  // #ifndef APP-PLUS-NVUE
-  for (let i = this.stack.length; i--;) {
-    const item = this.stack[i]
-    if (item.c || item.name === 'a' || item.name === 'video' || item.name === 'audio') return
-    item.c = 1
+  if (ENV === Taro.ENV_TYPE.RN) {
+    for (let i = this.stack.length; i--;) {
+      const item = this.stack[i]
+      if (item.c || item.name === 'a' || item.name === 'video' || item.name === 'audio') return
+      item.c = 1
+    }
   }
-  // #endif
 }
 
 /**
@@ -287,7 +290,6 @@ Parser.prototype.parseStyle = function (node) {
       styleObj[key] = value
     }
   }
-
   node.attrs.style = tmp
   return styleObj
 }
@@ -375,44 +377,41 @@ Parser.prototype.onOpenTag = function (selfClose) {
 
   // 转换 embed 标签
   if (node.name === 'embed') {
-    // #ifndef H5 || APP-PLUS
-    const src = attrs.src || ''
-    // 按照后缀名和 type 将 embed 转为 video 或 audio
-    if (src.includes('.mp4') || src.includes('.3gp') || src.includes('.m3u8') || (attrs.type || '').includes('video')) {
-      node.name = 'video'
-    } else if (src.includes('.mp3') || src.includes('.wav') || src.includes('.aac') || src.includes('.m4a') || (attrs.type || '').includes('audio')) {
-      node.name = 'audio'
+    if (ENV === Taro.ENV_TYPE.WEB || ENV === Taro.ENV_TYPE.RN) {
+      const src = attrs.src || ''
+      // 按照后缀名和 type 将 embed 转为 video 或 audio
+      if (src.includes('.mp4') || src.includes('.3gp') || src.includes('.m3u8') || (attrs.type || '').includes('video')) {
+        node.name = 'video'
+      } else if (src.includes('.mp3') || src.includes('.wav') || src.includes('.aac') || src.includes('.m4a') || (attrs.type || '').includes('audio')) {
+        node.name = 'audio'
+      }
+      if (attrs.autostart) {
+        attrs.autoplay = 'T'
+      }
+      attrs.controls = 'T'
+      this.expose()
     }
-    if (attrs.autostart) {
-      attrs.autoplay = 'T'
-    }
-    attrs.controls = 'T'
-    // #endif
-    // #ifdef H5 || APP-PLUS
-    this.expose()
-    // #endif
   }
 
-  // #ifndef APP-PLUS-NVUE
-  // 处理音视频
-  if (node.name === 'video' || node.name === 'audio') {
-    // 设置 id 以便获取 context
-    if (node.name === 'video' && !attrs.id) {
-      attrs.id = 'v' + idIndex++
+  if (ENV === Taro.ENV_TYPE.RN) {
+    if (node.name === 'video' || node.name === 'audio') {
+      // 设置 id 以便获取 context
+      if (node.name === 'video' && !attrs.id) {
+        attrs.id = 'v' + idIndex++
+      }
+      // 没有设置 controls 也没有设置 autoplay 的自动设置 controls
+      if (!attrs.controls && !attrs.autoplay) {
+        attrs.controls = 'T'
+      }
+      // 用数组存储所有可用的 source
+      node.src = []
+      if (attrs.src) {
+        node.src.push(attrs.src)
+        attrs.src = undefined
+      }
+      this.expose()
     }
-    // 没有设置 controls 也没有设置 autoplay 的自动设置 controls
-    if (!attrs.controls && !attrs.autoplay) {
-      attrs.controls = 'T'
-    }
-    // 用数组存储所有可用的 source
-    node.src = []
-    if (attrs.src) {
-      node.src.push(attrs.src)
-      attrs.src = undefined
-    }
-    this.expose()
   }
-  // #endif
 
   // 处理自闭合标签
   if (close) {
@@ -420,10 +419,14 @@ Parser.prototype.onOpenTag = function (selfClose) {
       // 通过 base 标签设置主域名
       if (node.name === 'base' && !this.options.domain) {
         this.options.domain = attrs.href
-      } /* #ifndef APP-PLUS-NVUE */ else if (node.name === 'source' && parent && (parent.name === 'video' || parent.name === 'audio') && attrs.src) {
-        // 设置 source 标签（仅父节点为 video 或 audio 时有效）
-        parent.src.push(attrs.src)
-      } /* #endif */
+      } else {
+        if (ENV === Taro.ENV_TYPE.RN) {
+          if (node.name === 'source' && parent && (parent.name === 'video' || parent.name === 'audio') && attrs.src) {
+            // 设置 source 标签（仅父节点为 video 或 audio 时有效）
+            parent.src.push(attrs.src)
+          }
+        }
+      }
       return
     }
 
@@ -448,69 +451,69 @@ Parser.prototype.onOpenTag = function (selfClose) {
               node.a = item.attrs
               break
             }
-            // #ifndef H5 || APP-PLUS
-            const style = item.attrs.style || ''
-            if (style.includes('flex:') && !style.includes('flex:0') && !style.includes('flex: 0') && (!styleObj.width || !styleObj.width.includes('%'))) {
-              styleObj.width = '100% !important'
-              styleObj.height = ''
-              for (let j = i + 1; j < this.stack.length; j++) {
-                this.stack[j].attrs.style = (this.stack[j].attrs.style || '').replace('inline-', '')
-              }
-            } else if (style.includes('flex') && styleObj.width === '100%') {
-              for (let j = i + 1; j < this.stack.length; j++) {
-                const style = this.stack[j].attrs.style || ''
-                if (!style.includes(';width') && !style.includes(' width') && style.indexOf('width') !== 0) {
+            if (ENV === Taro.ENV_TYPE.WEB || ENV === Taro.ENV_TYPE.RN) {
+              const style = item.attrs.style || ''
+              if (style.includes('flex:') && !style.includes('flex:0') && !style.includes('flex: 0') && (!styleObj.width || !styleObj.width.includes('%'))) {
+                styleObj.width = '100% !important'
+                styleObj.height = ''
+                for (let j = i + 1; j < this.stack.length; j++) {
+                  this.stack[j].attrs.style = (this.stack[j].attrs.style || '').replace('inline-', '')
+                }
+              } else if (style.includes('flex') && styleObj.width === '100%') {
+                for (let j = i + 1; j < this.stack.length; j++) {
+                  const style = this.stack[j].attrs.style || ''
+                  if (!style.includes(';width') && !style.includes(' width') && style.indexOf('width') !== 0) {
+                    styleObj.width = ''
+                    break
+                  }
+                }
+              } else if (style.includes('inline-block')) {
+                if (styleObj.width && styleObj.width[styleObj.width.length - 1] === '%') {
+                  item.attrs.style += ';max-width:' + styleObj.width
                   styleObj.width = ''
-                  break
+                } else {
+                  item.attrs.style += ';max-width:100%'
                 }
               }
-            } else if (style.includes('inline-block')) {
-              if (styleObj.width && styleObj.width[styleObj.width.length - 1] === '%') {
-                item.attrs.style += ';max-width:' + styleObj.width
-                styleObj.width = ''
-              } else {
-                item.attrs.style += ';max-width:100%'
-              }
             }
-            // #endif
             item.c = 1
           }
           attrs.i = this.imgList.length.toString()
           let src = attrs['original-src'] || attrs.src
-          // #ifndef H5 || MP-ALIPAY || APP-PLUS || MP-360
-          if (this.imgList.includes(src)) {
-            // 如果有重复的链接则对域名进行随机大小写变换避免预览时错位
-            let i = src.indexOf('://')
-            if (i !== -1) {
-              i += 3
-              let newSrc = src.substr(0, i)
-              for (; i < src.length; i++) {
-                if (src[i] === '/') break
-                newSrc += Math.random() > 0.5 ? src[i].toUpperCase() : src[i]
+          if (ENV === Taro.ENV_TYPE.WEB || ENV === Taro.ENV_TYPE.ALIPAY || ENV === Taro.ENV_TYPE.RN) {
+            if (this.imgList.includes(src)) {
+              // 如果有重复的链接则对域名进行随机大小写变换避免预览时错位
+              let i = src.indexOf('://')
+              if (i !== -1) {
+                i += 3
+                let newSrc = src.substr(0, i)
+                for (; i < src.length; i++) {
+                  if (src[i] === '/') break
+                  newSrc += Math.random() > 0.5 ? src[i].toUpperCase() : src[i]
+                }
+                newSrc += src.substr(i)
+                src = newSrc
               }
-              newSrc += src.substr(i)
-              src = newSrc
             }
           }
-          // #endif
           this.imgList.push(src)
-          // #ifdef H5 || APP-PLUS
-          if (this.options.lazyLoad) {
-            attrs['data-src'] = attrs.src
-            attrs.src = undefined
+          if (ENV === Taro.ENV_TYPE.WEB || ENV === Taro.ENV_TYPE.RN) {
+            if (this.options.lazyLoad) {
+              attrs['data-src'] = attrs.src
+              attrs.src = undefined
+            }
           }
-          // #endif
         }
       }
       if (styleObj.display === 'inline') {
         styleObj.display = ''
       }
-      // #ifndef APP-PLUS-NVUE
-      if (attrs.ignore) {
-        styleObj['max-width'] = styleObj['max-width'] || '100%'
-        attrs.style += ';-webkit-touch-callout:none'
+      if (ENV === Taro.ENV_TYPE.RN) {
+        if (attrs.ignore) {
+          styleObj['max-width'] = styleObj['max-width'] || '100%'
+          attrs.style += ';-webkit-touch-callout:none'
+        }
       }
-      // #endif
       // 设置的宽度超出屏幕，为避免变形，高度转为自动
       if (parseInt(styleObj.width) > windowWidth) {
         styleObj.height = undefined
@@ -541,7 +544,6 @@ Parser.prototype.onOpenTag = function (selfClose) {
     node.children = []
     this.stack.push(node)
   }
-
   // 加入节点树
   siblings.push(node)
 }
@@ -613,108 +615,108 @@ Parser.prototype.popNode = function () {
       this.xml--
       return
     }
-    // #ifdef APP-PLUS-NVUE
-    (function traversal (node) {
-      if (node.name) {
-        // 调整 svg 的大小写
-        node.name = config.svgDict[node.name] || node.name
-        for (const item in node.attrs) {
-          if (config.svgDict[item]) {
-            node.attrs[config.svgDict[item]] = node.attrs[item]
-            node.attrs[item] = undefined
+    if (ENV === Taro.ENV_TYPE.RN) {
+      (function traversal(node) {
+        if (node.name) {
+          // 调整 svg 的大小写
+          node.name = config.svgDict[node.name] || node.name
+          for (const item in node.attrs) {
+            if (config.svgDict[item]) {
+              node.attrs[config.svgDict[item]] = node.attrs[item]
+              node.attrs[item] = undefined
+            }
+          }
+          for (let i = 0; i < (node.children || []).length; i++) {
+            traversal(node.children[i])
           }
         }
-        for (let i = 0; i < (node.children || []).length; i++) {
-          traversal(node.children[i])
-        }
-      }
-    })(node)
-    // #endif
-    // #ifndef APP-PLUS-NVUE
-    let src = ''
-    const style = attrs.style
-    attrs.style = ''
-    attrs.xmlns = 'http://www.w3.org/2000/svg';
-    (function traversal (node) {
-      if (node.type === 'text') {
-        src += node.text
-        return
-      }
-      const name = config.svgDict[node.name] || node.name
-      src += '<' + name
-      for (const item in node.attrs) {
-        const val = node.attrs[item]
-        if (val) {
-          src += ` ${config.svgDict[item] || item}="${val}"`
-        }
-      }
-      if (!node.children) {
-        src += '/>'
-      } else {
-        src += '>'
-        for (let i = 0; i < node.children.length; i++) {
-          traversal(node.children[i])
-        }
-        src += '</' + name + '>'
-      }
-    })(node)
-    node.name = 'img'
-    node.attrs = {
-      src: 'data:image/svg+xml;utf8,' + src.replace(/#/g, '%23'),
-      style,
-      ignore: 'T'
+      })(node)
     }
-    node.children = undefined
-    // #endif
+    if (ENV === Taro.ENV_TYPE.RN) {
+      let src = ''
+      const style = attrs.style
+      attrs.style = ''
+      attrs.xmlns = 'http://www.w3.org/2000/svg';
+      (function traversal(node) {
+        if (node.type === 'text') {
+          src += node.text
+          return
+        }
+        const name = config.svgDict[node.name] || node.name
+        src += '<' + name
+        for (const item in node.attrs) {
+          const val = node.attrs[item]
+          if (val) {
+            src += ` ${config.svgDict[item] || item}="${val}"`
+          }
+        }
+        if (!node.children) {
+          src += '/>'
+        } else {
+          src += '>'
+          for (let i = 0; i < node.children.length; i++) {
+            traversal(node.children[i])
+          }
+          src += '</' + name + '>'
+        }
+      })(node)
+      node.name = 'img'
+      node.attrs = {
+        src: 'data:image/svg+xml;utf8,' + src.replace(/#/g, '%23'),
+        style,
+        ignore: 'T'
+      }
+      node.children = undefined
+    }
     this.xml = false
     return
   }
 
-  // #ifndef APP-PLUS-NVUE
-  // 转换 align 属性
-  if (attrs.align) {
-    if (node.name === 'table') {
-      if (attrs.align === 'center') {
-        styleObj['margin-inline-start'] = styleObj['margin-inline-end'] = 'auto'
-      } else {
-        styleObj.float = attrs.align
-      }
-    } else {
-      styleObj['text-align'] = attrs.align
-    }
-    attrs.align = undefined
-  }
-
-  // 转换 dir 属性
-  if (attrs.dir) {
-    styleObj.direction = attrs.dir
-    attrs.dir = undefined
-  }
-
-  // 转换 font 标签的属性
-  if (node.name === 'font') {
-    if (attrs.color) {
-      styleObj.color = attrs.color
-      attrs.color = undefined
-    }
-    if (attrs.face) {
-      styleObj['font-family'] = attrs.face
-      attrs.face = undefined
-    }
-    if (attrs.size) {
-      let size = parseInt(attrs.size)
-      if (!isNaN(size)) {
-        if (size < 1) {
-          size = 1
-        } else if (size > 7) {
-          size = 7
+  if (ENV === Taro.ENV_TYPE.RN) {
+    // 转换 align 属性
+    if (attrs.align) {
+      if (node.name === 'table') {
+        if (attrs.align === 'center') {
+          styleObj['margin-inline-start'] = styleObj['margin-inline-end'] = 'auto'
+        } else {
+          styleObj.float = attrs.align
         }
-        styleObj['font-size'] = ['x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'xxx-large'][size - 1]
+      } else {
+        styleObj['text-align'] = attrs.align
       }
-      attrs.size = undefined
+      attrs.align = undefined
+    }
+
+    // 转换 dir 属性
+    if (attrs.dir) {
+      styleObj.direction = attrs.dir
+      attrs.dir = undefined
+    }
+
+    // 转换 font 标签的属性
+    if (node.name === 'font') {
+      if (attrs.color) {
+        styleObj.color = attrs.color
+        attrs.color = undefined
+      }
+      if (attrs.face) {
+        styleObj['font-family'] = attrs.face
+        attrs.face = undefined
+      }
+      if (attrs.size) {
+        let size = parseInt(attrs.size)
+        if (!isNaN(size)) {
+          if (size < 1) {
+            size = 1
+          } else if (size > 7) {
+            size = 7
+          }
+          styleObj['font-size'] = ['x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'xxx-large'][size - 1]
+        }
+        attrs.size = undefined
+      }
     }
   }
-  // #endif
 
   // 一些编辑器的自带 class
   if ((attrs.class || '').includes('align-center')) {
@@ -728,303 +730,300 @@ Parser.prototype.popNode = function () {
     styleObj['box-sizing'] = 'border-box'
   }
 
-  // #ifndef APP-PLUS-NVUE
-  if (config.blockTags[node.name]) {
-    node.name = 'div'
-  } else if (!config.trustTags[node.name] && !this.xml) {
-    // 未知标签转为 span，避免无法显示
-    node.name = 'span'
-  }
-
-  if (node.name === 'a' || node.name === 'ad'
-    // #ifdef H5 || APP-PLUS
-    || node.name === 'iframe' // eslint-disable-line
-    // #endif
-  ) {
-    this.expose()
-  } else if (node.name === 'video') {
-    if ((styleObj.height || '').includes('auto')) {
-      styleObj.height = undefined
+  if (ENV === Taro.ENV_TYPE.RN) {
+    if (config.blockTags[node.name]) {
+      node.name = 'div'
+    } else if (!config.trustTags[node.name] && !this.xml) {
+      // 未知标签转为 span，避免无法显示
+      node.name = 'span'
     }
-    /* #ifdef APP-PLUS */
-    let str = '<video style="width:100%;height:100%"'
-    for (const item in attrs) {
-      if (attrs[item]) {
-        str += ' ' + item + '="' + attrs[item] + '"'
+    const satisfy = ENV === Taro.ENV_TYPE.WEB || ENV === Taro.ENV_TYPE.RN
+    if (node.name === 'a' || node.name === 'ad' || (satisfy ? node.name === 'iframe' : true)
+    ) {
+      this.expose()
+    } else if (node.name === 'video') {
+      if ((styleObj.height || '').includes('auto')) {
+        styleObj.height = undefined
       }
-    }
-    if (this.options.pauseVideo) {
-      str += ' onplay="this.dispatchEvent(new CustomEvent(\'vplay\',{bubbles:!0}));for(var e=document.getElementsByTagName(\'video\'),t=0;t<e.length;t++)e[t]!=this&&e[t].pause()"'
-    }
-    str += '>'
-    for (let i = 0; i < node.src.length; i++) {
-      str += '<source src="' + node.src[i] + '">'
-    }
-    str += '</video>'
-    node.html = str
-    /* #endif */
-  } else if ((node.name === 'ul' || node.name === 'ol') && node.c) {
-    // 列表处理
-    const types = {
-      a: 'lower-alpha',
-      A: 'upper-alpha',
-      i: 'lower-roman',
-      I: 'upper-roman'
-    }
-    if (types[attrs.type]) {
-      attrs.style += ';list-style-type:' + types[attrs.type]
-      attrs.type = undefined
-    }
-    for (let i = children.length; i--;) {
-      if (children[i].name === 'li') {
-        children[i].c = 1
-      }
-    }
-  } else if (node.name === 'table') {
-    // 表格处理
-    // cellpadding、cellspacing、border 这几个常用表格属性需要通过转换实现
-    let padding = parseFloat(attrs.cellpadding)
-    let spacing = parseFloat(attrs.cellspacing)
-    const border = parseFloat(attrs.border)
-    if (node.c) {
-      // padding 和 spacing 默认 2
-      if (isNaN(padding)) {
-        padding = 2
-      }
-      if (isNaN(spacing)) {
-        spacing = 2
-      }
-    }
-    if (border) {
-      attrs.style += ';border:' + border + 'px solid gray'
-    }
-    if (node.flag && node.c) {
-      // 有 colspan 或 rowspan 且含有链接的表格通过 grid 布局实现
-      styleObj.display = 'grid'
-      if (spacing) {
-        styleObj['grid-gap'] = spacing + 'px'
-        styleObj.padding = spacing + 'px'
-      } else if (border) {
-        // 无间隔的情况下避免边框重叠
-        attrs.style += ';border-left:0;border-top:0'
-      }
-
-      const width = [] // 表格的列宽
-      const trList = [] // tr 列表
-      const cells = [] // 保存新的单元格
-      const map = {}; // 被合并单元格占用的格子
-
-      (function traversal (nodes) {
-        for (let i = 0; i < nodes.length; i++) {
-          if (nodes[i].name === 'tr') {
-            trList.push(nodes[i])
-          } else {
-            traversal(nodes[i].children || [])
+      if (ENV === Taro.ENV_TYPE.RN) {
+        let str = '<video style="width:100%;height:100%"'
+        for (const item in attrs) {
+          if (attrs[item]) {
+            str += ' ' + item + '="' + attrs[item] + '"'
           }
         }
-      })(children)
-
-      for (let row = 1; row <= trList.length; row++) {
-        let col = 1
-        for (let j = 0; j < trList[row - 1].children.length; j++) {
-          const td = trList[row - 1].children[j]
-          if (td.name === 'td' || td.name === 'th') {
-            // 这个格子被上面的单元格占用，则列号++
-            while (map[row + '.' + col]) {
-              col++
-            }
-            let style = td.attrs.style || ''
-            const start = style.indexOf('width') ? style.indexOf(';width') : 0
-            // 提取出 td 的宽度
-            if (start !== -1) {
-              let end = style.indexOf(';', start + 6)
-              if (end === -1) {
-                end = style.length
-              }
-              if (!td.attrs.colspan) {
-                width[col] = style.substring(start ? start + 7 : 6, end)
-              }
-              style = style.substr(0, start) + style.substr(end)
-            }
-            style += (border ? `;border:${border}px solid gray` + (spacing ? '' : ';border-right:0;border-bottom:0') : '') + (padding ? `;padding:${padding}px` : '')
-            // 处理列合并
-            if (td.attrs.colspan) {
-              style += `;grid-column-start:${col};grid-column-end:${col + parseInt(td.attrs.colspan)}`
-              if (!td.attrs.rowspan) {
-                style += `;grid-row-start:${row};grid-row-end:${row + 1}`
-              }
-              col += parseInt(td.attrs.colspan) - 1
-            }
-            // 处理行合并
-            if (td.attrs.rowspan) {
-              style += `;grid-row-start:${row};grid-row-end:${row + parseInt(td.attrs.rowspan)}`
-              if (!td.attrs.colspan) {
-                style += `;grid-column-start:${col};grid-column-end:${col + 1}`
-              }
-              // 记录下方单元格被占用
-              for (let rowspan = 1; rowspan < td.attrs.rowspan; rowspan++) {
-                for (let colspan = 0; colspan < (td.attrs.colspan || 1); colspan++) {
-                  map[(row + rowspan) + '.' + (col - colspan)] = 1
-                }
-              }
-            }
-            if (style) {
-              td.attrs.style = style
-            }
-            cells.push(td)
-            col++
-          }
+        if (this.options.pauseVideo) {
+          str += ' onplay="this.dispatchEvent(new CustomEvent(\'vplay\',{bubbles:!0}));for(var e=document.getElementsByTagName(\'video\'),t=0;t<e.length;t++)e[t]!=this&&e[t].pause()"'
         }
-        if (row === 1) {
-          let temp = ''
-          for (let i = 1; i < col; i++) {
-            temp += (width[i] ? width[i] : 'auto') + ' '
-          }
-          styleObj['grid-template-columns'] = temp
+        str += '>'
+        for (let i = 0; i < node.src.length; i++) {
+          str += '<source src="' + node.src[i] + '">'
+        }
+        str += '</video>'
+        node.html = str
+      }
+    } else if ((node.name === 'ul' || node.name === 'ol') && node.c) {
+      // 列表处理
+      const types = {
+        a: 'lower-alpha',
+        A: 'upper-alpha',
+        i: 'lower-roman',
+        I: 'upper-roman'
+      }
+      if (types[attrs.type]) {
+        attrs.style += ';list-style-type:' + types[attrs.type]
+        attrs.type = undefined
+      }
+      for (let i = children.length; i--;) {
+        if (children[i].name === 'li') {
+          children[i].c = 1
         }
       }
-      node.children = cells
-    } else {
-      // 没有使用合并单元格的表格通过 table 布局实现
+    } else if (node.name === 'table') {
+      // 表格处理
+      // cellpadding、cellspacing、border 这几个常用表格属性需要通过转换实现
+      let padding = parseFloat(attrs.cellpadding)
+      let spacing = parseFloat(attrs.cellspacing)
+      const border = parseFloat(attrs.border)
       if (node.c) {
-        styleObj.display = 'table'
+        // padding 和 spacing 默认 2
+        if (isNaN(padding)) {
+          padding = 2
+        }
+        if (isNaN(spacing)) {
+          spacing = 2
+        }
       }
-      if (!isNaN(spacing)) {
-        styleObj['border-spacing'] = spacing + 'px'
+      if (border) {
+        attrs.style += ';border:' + border + 'px solid gray'
       }
-      if (border || padding) {
-        // 遍历
-        (function traversal (nodes) {
+      if (node.flag && node.c) {
+        // 有 colspan 或 rowspan 且含有链接的表格通过 grid 布局实现
+        styleObj.display = 'grid'
+        if (spacing) {
+          styleObj['grid-gap'] = spacing + 'px'
+          styleObj.padding = spacing + 'px'
+        } else if (border) {
+          // 无间隔的情况下避免边框重叠
+          attrs.style += ';border-left:0;border-top:0'
+        }
+
+        const width = [] // 表格的列宽
+        const trList = [] // tr 列表
+        const cells = [] // 保存新的单元格
+        const map = {}; // 被合并单元格占用的格子
+
+        (function traversal(nodes) {
           for (let i = 0; i < nodes.length; i++) {
-            const td = nodes[i]
-            if (td.name === 'th' || td.name === 'td') {
-              if (border) {
-                td.attrs.style = `border:${border}px solid gray;${td.attrs.style || ''}`
-              }
-              if (padding) {
-                td.attrs.style = `padding:${padding}px;${td.attrs.style || ''}`
-              }
-            } else if (td.children) {
-              traversal(td.children)
+            if (nodes[i].name === 'tr') {
+              trList.push(nodes[i])
+            } else {
+              traversal(nodes[i].children || [])
             }
           }
         })(children)
+
+        for (let row = 1; row <= trList.length; row++) {
+          let col = 1
+          for (let j = 0; j < trList[row - 1].children.length; j++) {
+            const td = trList[row - 1].children[j]
+            if (td.name === 'td' || td.name === 'th') {
+              // 这个格子被上面的单元格占用，则列号++
+              while (map[row + '.' + col]) {
+                col++
+              }
+              let style = td.attrs.style || ''
+              const start = style.indexOf('width') ? style.indexOf(';width') : 0
+              // 提取出 td 的宽度
+              if (start !== -1) {
+                let end = style.indexOf(';', start + 6)
+                if (end === -1) {
+                  end = style.length
+                }
+                if (!td.attrs.colspan) {
+                  width[col] = style.substring(start ? start + 7 : 6, end)
+                }
+                style = style.substr(0, start) + style.substr(end)
+              }
+              style += (border ? `;border:${border}px solid gray` + (spacing ? '' : ';border-right:0;border-bottom:0') : '') + (padding ? `;padding:${padding}px` : '')
+              // 处理列合并
+              if (td.attrs.colspan) {
+                style += `;grid-column-start:${col};grid-column-end:${col + parseInt(td.attrs.colspan)}`
+                if (!td.attrs.rowspan) {
+                  style += `;grid-row-start:${row};grid-row-end:${row + 1}`
+                }
+                col += parseInt(td.attrs.colspan) - 1
+              }
+              // 处理行合并
+              if (td.attrs.rowspan) {
+                style += `;grid-row-start:${row};grid-row-end:${row + parseInt(td.attrs.rowspan)}`
+                if (!td.attrs.colspan) {
+                  style += `;grid-column-start:${col};grid-column-end:${col + 1}`
+                }
+                // 记录下方单元格被占用
+                for (let rowspan = 1; rowspan < td.attrs.rowspan; rowspan++) {
+                  for (let colspan = 0; colspan < (td.attrs.colspan || 1); colspan++) {
+                    map[(row + rowspan) + '.' + (col - colspan)] = 1
+                  }
+                }
+              }
+              if (style) {
+                td.attrs.style = style
+              }
+              cells.push(td)
+              col++
+            }
+          }
+          if (row === 1) {
+            let temp = ''
+            for (let i = 1; i < col; i++) {
+              temp += (width[i] ? width[i] : 'auto') + ' '
+            }
+            styleObj['grid-template-columns'] = temp
+          }
+        }
+        node.children = cells
+      } else {
+        // 没有使用合并单元格的表格通过 table 布局实现
+        if (node.c) {
+          styleObj.display = 'table'
+        }
+        if (!isNaN(spacing)) {
+          styleObj['border-spacing'] = spacing + 'px'
+        }
+        if (border || padding) {
+          // 遍历
+          (function traversal(nodes) {
+            for (let i = 0; i < nodes.length; i++) {
+              const td = nodes[i]
+              if (td.name === 'th' || td.name === 'td') {
+                if (border) {
+                  td.attrs.style = `border:${border}px solid gray;${td.attrs.style || ''}`
+                }
+                if (padding) {
+                  td.attrs.style = `padding:${padding}px;${td.attrs.style || ''}`
+                }
+              } else if (td.children) {
+                traversal(td.children)
+              }
+            }
+          })(children)
+        }
       }
-    }
-    // 给表格添加一个单独的横向滚动层
-    if (this.options.scrollTable && !(attrs.style || '').includes('inline')) {
-      const table = Object.assign({}, node)
-      node.name = 'div'
-      node.attrs = {
-        style: 'overflow:auto'
+      // 给表格添加一个单独的横向滚动层
+      if (this.options.scrollTable && !(attrs.style || '').includes('inline')) {
+        const table = Object.assign({}, node)
+        node.name = 'div'
+        node.attrs = {
+          style: 'overflow:auto'
+        }
+        node.children = [table]
+        attrs = table.attrs
       }
-      node.children = [table]
-      attrs = table.attrs
-    }
-  } else if ((node.name === 'td' || node.name === 'th') && (attrs.colspan || attrs.rowspan)) {
-    for (let i = this.stack.length; i--;) {
-      if (this.stack[i].name === 'table') {
-        this.stack[i].flag = 1 // 指示含有合并单元格
-        break
+    } else if ((node.name === 'td' || node.name === 'th') && (attrs.colspan || attrs.rowspan)) {
+      for (let i = this.stack.length; i--;) {
+        if (this.stack[i].name === 'table') {
+          this.stack[i].flag = 1 // 指示含有合并单元格
+          break
+        }
       }
-    }
-  } else if (node.name === 'ruby') {
-    // 转换 ruby
-    node.name = 'span'
-    for (let i = 0; i < children.length - 1; i++) {
-      if (children[i].type === 'text' && children[i + 1].name === 'rt') {
-        children[i] = {
-          name: 'div',
-          attrs: {
-            style: 'display:inline-block;text-align:center'
-          },
-          children: [{
+    } else if (node.name === 'ruby') {
+      // 转换 ruby
+      node.name = 'span'
+      for (let i = 0; i < children.length - 1; i++) {
+        if (children[i].type === 'text' && children[i + 1].name === 'rt') {
+          children[i] = {
             name: 'div',
             attrs: {
-              style: 'font-size:50%;' + (children[i + 1].attrs.style || '')
+              style: 'display:inline-block;text-align:center'
             },
-            children: children[i + 1].children
-          }, children[i]]
+            children: [{
+              name: 'div',
+              attrs: {
+                style: 'font-size:50%;' + (children[i + 1].attrs.style || '')
+              },
+              children: children[i + 1].children
+            }, children[i]]
+          }
+          children.splice(i + 1, 1)
         }
-        children.splice(i + 1, 1)
       }
-    }
-  } else if (node.c) {
-    node.c = 2
-    for (let i = node.children.length; i--;) {
-      const child = node.children[i]
-      // #ifdef (MP-WEIXIN || MP-QQ || APP-PLUS || MP-360) && VUE3
-      if (child.name && (config.inlineTags[child.name] || (child.attrs.style || '').includes('inline'))) {
-        child.c = 1
-      }
-      // #endif
-      if (!child.c || child.name === 'table') {
-        node.c = 1
-      }
-    }
-  }
-
-  if ((styleObj.display || '').includes('flex') && !node.c) {
-    for (let i = children.length; i--;) {
-      const item = children[i]
-      if (item.f) {
-        item.attrs.style = (item.attrs.style || '') + item.f
-        item.f = undefined
-      }
-    }
-  }
-  // flex 布局时部分样式需要提取到 rich-text 外层
-  const flex = parent && ((parent.attrs.style || '').includes('flex') || (parent.attrs.style || '').includes('grid'))
-    // #ifdef MP-WEIXIN
-    // 检查基础库版本 virtualHost 是否可用
-    && !(node.c && wx.getNFCAdapter) // eslint-disable-line
-    // #endif
-    // #ifndef MP-WEIXIN || MP-QQ || MP-BAIDU || MP-TOUTIAO
-    && !node.c // eslint-disable-line
-  // #endif
-  if (flex) {
-    node.f = ';max-width:100%'
-  }
-
-  // 优化长内容加载速度
-  if (children.length >= 50 && node.c && !(styleObj.display || '').includes('flex')) {
-    let i = children.length - 1
-    for (let j = i; j >= -1; j--) {
-      // 合并多个块级标签
-      if (j === -1 || children[j].c || !children[j].name || (children[j].name !== 'div' && children[j].name !== 'p' && children[j].name[0] !== 'h') || (children[j].attrs.style || '').includes('inline')) {
-        if (i - j >= 5) {
-          children.splice(j + 1, i - j, {
-            name: 'div',
-            attrs: {},
-            children: node.children.slice(j + 1, i + 1)
-          })
+    } else if (node.c) {
+      node.c = 2
+      for (let i = node.children.length; i--;) {
+        const child = node.children[i]
+        if (ENV === Taro.ENV_TYPE.WEAPP || ENV === Taro.ENV_TYPE.QQ || ENV === Taro.ENV_TYPE.RN) {
+          if (child.name && (config.inlineTags[child.name] || (child.attrs.style || '').includes('inline'))) {
+            child.c = 1
+          }
         }
-        i = j - 1
+        if (!child.c || child.name === 'table') {
+          node.c = 1
+        }
+      }
+    }
+
+    if ((styleObj.display || '').includes('flex') && !node.c) {
+      for (let i = children.length; i--;) {
+        const item = children[i]
+        if (item.f) {
+          item.attrs.style = (item.attrs.style || '') + item.f
+          item.f = undefined
+        }
+      }
+    }
+    // flex 布局时部分样式需要提取到 rich-text 外层
+    const satisfy2 = ENV === Taro.ENV_TYPE.WEAPP || ENV === Taro.ENV_TYPE.QQ || ENV === Taro.ENV_TYPE.SWAN || ENV === Taro.ENV_TYPE.TT
+    const flex = parent && ((parent.attrs.style || '').includes('flex') || (parent.attrs.style || '').includes('grid'))
+      // 检查基础库版本 virtualHost 是否可用
+      && (ENV === Taro.ENV_TYPE.WEAPP ? !(node.c && Taro.getNFCAdapter) : true)
+      && (satisfy2 ? !node.c : true)
+    if (flex) {
+      node.f = ';max-width:100%'
+    }
+
+    // 优化长内容加载速度
+    if (children.length >= 50 && node.c && !(styleObj.display || '').includes('flex')) {
+      let i = children.length - 1
+      for (let j = i; j >= -1; j--) {
+        // 合并多个块级标签
+        if (j === -1 || children[j].c || !children[j].name || (children[j].name !== 'div' && children[j].name !== 'p' && children[j].name[0] !== 'h') || (children[j].attrs.style || '').includes('inline')) {
+          if (i - j >= 5) {
+            children.splice(j + 1, i - j, {
+              name: 'div',
+              attrs: {},
+              children: node.children.slice(j + 1, i + 1)
+            })
+          }
+          i = j - 1
+        }
       }
     }
   }
-  // #endif
 
   for (const key in styleObj) {
     if (styleObj[key]) {
       const val = `;${key}:${styleObj[key].replace(' !important', '')}`
-      /* #ifndef APP-PLUS-NVUE */
-      if (flex && ((key.includes('flex') && key !== 'flex-direction') || key === 'align-self' || key.includes('grid') || styleObj[key][0] === '-' || (key.includes('width') && val.includes('%')))) {
-        node.f += val
-        if (key === 'width') {
-          attrs.style += ';width:100%'
+      if (ENV === Taro.ENV_TYPE.RN) {
+        if (flex && ((key.includes('flex') && key !== 'flex-direction') || key === 'align-self' || key.includes('grid') || styleObj[key][0] === '-' || (key.includes('width') && val.includes('%')))) {
+          node.f += val
+          if (key === 'width') {
+            attrs.style += ';width:100%'
+          }
+        } else {
+          attrs.style += val
         }
-      } else /* #endif */ {
+      } else {
         attrs.style += val
       }
     }
   }
   attrs.style = attrs.style.substr(1) || undefined
-  // #ifdef (MP-WEIXIN || MP-QQ) && VUE3
-  if (!attrs.style) {
-    delete attrs.style
+  if (ENV === Taro.ENV_TYPE.WEAPP || ENV === Taro.ENV_TYPE.QQ) {
+    if (!attrs.style) {
+      delete attrs.style
+    }
   }
-  // #endif
 }
 
 /**
@@ -1054,17 +1053,17 @@ Parser.prototype.onText = function (text) {
   }
   const node = Object.create(null)
   node.type = 'text'
-  // #ifdef (MP-BAIDU || MP-ALIPAY || MP-TOUTIAO) && VUE3
-  node.attrs = {}
-  // #endif
+  if (ENV === Taro.ENV_TYPE.SWAN || ENV === Taro.ENV_TYPE.ALIPAY || ENV === Taro.ENV_TYPE.TT) {
+    node.attrs = {}
+  }
   node.text = decodeEntity(text)
   if (this.hook(node)) {
-    // #ifdef MP-WEIXIN
-    if (this.options.selectable === 'force' && system.includes('iOS')) {
-      this.expose()
-      node.us = 'T'
+    if (ENV === Taro.ENV_TYPE.WEAPP) {
+      if (this.options.selectable === 'force' && system.includes('iOS')) {
+        this.expose()
+        node.us = 'T'
+      }
     }
-    // #endif
     const siblings = this.stack.length ? this.stack[this.stack.length - 1].children : this.nodes
     siblings.push(node)
   }
@@ -1074,7 +1073,7 @@ Parser.prototype.onText = function (text) {
  * @description html 词法分析器
  * @param {Object} handler 高层处理器
  */
-function Lexer (handler) {
+function Lexer(handler) {
   this.handler = handler
 }
 

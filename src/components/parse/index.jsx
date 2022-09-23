@@ -52,7 +52,7 @@ function Index({
     console.log(imgs.current, 'imgs.current')
     setNodes([...isNodes])
   }
-  return <Node childs={nodes} imgs={imgs.current} opts={[lazyLoad, loadingImg, errorImg, showImgMenu]} name='span'></Node>;
+  return <Node tagStyle={tagStyle} childs={nodes} imgs={imgs.current} opts={[lazyLoad, loadingImg, errorImg, showImgMenu]} name='span'></Node>;
 }
 
 export default Index;

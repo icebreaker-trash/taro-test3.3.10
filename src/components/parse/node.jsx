@@ -1,9 +1,12 @@
-import { List, Image } from "@antmjs/vantui";
-import { View, Block, Text, Video, Audio, RichText } from "@tarojs/components";
+// import { List, Image } from "@antmjs/vantui";
+import { View, Block, Text, Video, Audio, RichText, Image } from "@tarojs/components";
 
 import Taro from "@tarojs/taro";
 import { useEffect, useState } from 'react'
+import useStateRef from 'react-usestateref';
+
 import './node.scss'
+
 
 function Node({
   name,
@@ -14,10 +17,30 @@ function Node({
   onPlay,
   onLinktap,
   onError,
+  tagStyle
 }) {
-  const [ctrl] = useState({});
-
-  function imgLoad() { }
+  const [ctrl, setCtrl, ctrlRef] = useStateRef({});
+  const [cusStyle, setCusStyle] = useState({})
+  if(name === 'img'){
+    setCusStyle(tagStyle)
+  }
+  function imgLoad(e, item, i) {
+    // #ifndef H5 || APP-PLUS
+    // 设置原宽度
+    if (!childs[i].w)
+      setCtrl(state => {
+        state[i] = e.detail.width
+        return state
+      })
+    else
+      // #endif
+      // 加载完毕，取消加载中占位图
+      if ((opts[1] && !ctrlRef.current[i]) || ctrlRef.current[i] == -1)
+        setCtrl(state => {
+          state[i] = 1
+          return state
+        })
+  }
   function mediaError(e, item) {
     onError &&
       onError({
@@ -114,7 +137,7 @@ function Node({
       // </Block>
       <Block key={i}>
         {
-          n.name === "img" ? renderImage(n)
+          n.name === "img" ? renderImage(n, i)
             : (n.text ? renderText(n)
               : (n.name === "br" ? <View style={{ padding: '10px' }}><br /></View>
                 : (n.name === "a" ? renderA(n, i)
@@ -122,12 +145,12 @@ function Node({
                     : (n.name === "audio" ? renderAudio(n, i)
                       : n.name === "table" && n.c ? renderTable(n, i)
                         : n.c === 2 ? renderC2Action(n, i)
-                          : handleUse(n) ? <RichText id={n.attrs.id} style={n.f} nodes={[n]}></RichText>
-                            : !n.c ? <RichText id={n.attrs.id} style={n.f + ';display:inline'} preview={false} nodes={[n]}></RichText>
+                          : handleUse(n) ? <RichText id={n.attrs.id} style={n.f+';max-width: 100%'} nodes={[n]}></RichText>
+                            : !n.c ? <RichText id={n.attrs.id} style={n.f + ';display:inline;max-width: 100%'} preview={false} nodes={[n]}></RichText>
                               : n.c == 2 ? <View id={n.attrs.id} class={'_' + n.name + n.attrs.class} style={n.f + ';' + n.attrs.style}>
                                 {
                                   n.children.map((n2, j) => (
-                                    <Node key={j} style={n2.f} name={n2.name} attrs={n2.attrs} childs={n2.children} opts={opts} />
+                                    <Node tagStyle={tagStyle} key={j} style={n2.f} name={n2.name} attrs={n2.attrs} childs={n2.children} opts={opts} />
                                   ))
                                 }
                               </View>
@@ -142,17 +165,37 @@ function Node({
     )
   }
   function renderImage(n, i) {
-    return <Image
-      id={n.attrs.id}
-      className={"_img " + n.attrs.class}
-      style={(ctrl[i] === -1 ? "display:none;" : "") + n.attrs.style}
-      src={n.attrs.src || (ctrl.load ? n.attrs["data-src"] : "")}
-      data-i={i}
-      fit={n.h ? '' : 'widthFix'}
-      onLoad={imgLoad}
-      onError={(e) => mediaError(e, n)}
-      onClick={() => imgTap(n)}
-    />
+    if ((opts[1] && !ctrl[i]) || ctrl[i] < 0) {
+      // 占位图
+      return <Image className='_img' style={n.attrs.style} src={ctrl[i] < 0 ? opts[2] : opts[1]} mode='widthFix' />
+    }
+    if (Taro.getEnv() === Taro.ENV_TYPE.WEB || Taro.getEnv() === Taro.ENV_TYPE.RN || Taro.getEnv() === Taro.ENV_TYPE.WEAPP) {
+      return <Image
+        id={n.attrs.id}
+        className={'_img ' + n.attrs.class}
+        style={(ctrl[i] == -1 ? 'display:none;' : '') +
+          'width:' + (ctrl[i] || 1) + 'px;height:1px;' +
+          n.attrs.style} src={n.attrs.src}
+        mode={n.h ? '' : 'widthFix'}
+        lazy-load={opts[0]} webp={n.webp}
+        show-menu-by-longpress={opts[3] && !n.attrs.ignore}
+        image-menu-prevent={!opts[3] || n.attrs.ignore}
+        onLoad={(e) => imgLoad(e, n, i)}
+        onError={(e) => mediaError(e, n)}
+        onClick={() => imgTap(n)}
+      />
+    }
+    // return <Image
+    //   id={n.attrs.id}
+    //   className={"_img " + n.attrs.class}
+    //   style={(ctrl[i] === -1 ? "display:none;" : "") + n.attrs.style}
+    //   src={n.attrs.src || (ctrl.load ? n.attrs["data-src"] : "")}
+    //   data-i={i}
+    //   fit={n.h ? '' : 'widthFix'}
+    //   onLoad={imgLoad}
+    //   onError={(e) => mediaError(e, n)}
+    //   onClick={() => imgTap(n)}
+    // />
   }
   function renderText(n) {
     return <Text user-select={n.us} decode>
@@ -187,6 +230,7 @@ function Node({
     >
       <Node
         name='span'
+        tagStyle={tagStyle}
         childs={n.children}
         opts={opts}
         style='display: inherit'
@@ -213,7 +257,7 @@ function Node({
   function renderTable(n) {
     return <Block>
       {n.name === "li" ? (
-        <Node childs={n.children} opts={opts} imgs={imgs} />
+        <Node tagStyle={tagStyle} childs={n.children} opts={opts} imgs={imgs} />
       ) : (
         <View
           className={"_" + tbody.name + " " + tbody.attrs.class}
@@ -222,7 +266,7 @@ function Node({
           {n.children.map((tbody, x) => (
             <>
               {tbody.name === "td" || tbody.name === "th" ? (
-                <Node childs={tbody.children} opts={opts} imgs={imgs}></Node>
+                <Node tagStyle={tagStyle} childs={tbody.children} opts={opts} imgs={imgs}></Node>
               ) : (
                 <>
                   {tbody.children.map((tr, y) => (
@@ -234,7 +278,7 @@ function Node({
                           }
                           style={tr.attrs.style}
                         >
-                          <Node childs={tr.children} opts={opts} imgs={imgs} />
+                          <Node tagStyle={tagStyle} childs={tr.children} opts={opts} imgs={imgs} />
                         </View>
                       ) : (
                         <View
@@ -251,6 +295,7 @@ function Node({
                               style={td.attrs.style}
                             >
                               <Node
+                                tagStyle={tagStyle}
                                 childs={td.children}
                                 opts={opts}
                                 imgs={imgs}
@@ -284,6 +329,7 @@ function Node({
           childs={n2.children}
           opts={opts}
           imgs={imgs}
+          tagStyle={tagStyle}
         />
       ))}
     </View>
@@ -296,13 +342,15 @@ function Node({
       childs={n.children}
       opts={opts}
       imgs={imgs}
+      tagStyle={tagStyle}
     />
   }
   return (
     <View
       id={attrs.id}
-      className={`node-component _block _ ${name} ${attrs.class}`}
-      style={attrs.style}
+      // node-component _block _ ${name} ${attrs.class}
+      className={'_' + name + ' ' + attrs.class}
+      style={`${attrs.style};`}
     >
       {childs.map((n, i) => (
         forBlockRender(n, i)

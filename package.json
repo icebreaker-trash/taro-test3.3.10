@@ -27,8 +27,9 @@
   ],
   "author": "",
   "dependencies": {
-    "@antmjs/vantui": "^2.1.0",
+    "@antmjs/vantui": "^2.2.0",
     "@babel/runtime": "^7.7.7",
+    "@taroify/core": "^0.1.0-alpha.1",
     "@tarojs/components": "3.3.10",
     "@tarojs/react": "3.3.10",
     "@tarojs/runtime": "3.3.10",
@@ -44,6 +45,7 @@
   "devDependencies": {
     "@babel/core": "^7.8.0",
     "@tarojs/mini-runner": "3.3.10",
+    "@tarojs/plugin-react-devtools": "3.3.10",
     "@tarojs/webpack-runner": "3.3.10",
     "@types/react": "^17.0.2",
     "@types/webpack-env": "^1.13.6",
