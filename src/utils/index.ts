@@ -15,6 +15,37 @@ const loginOb: LoginOb = {
   isLogin: false,
   fnList: []
 }
+/**
+ * 获取 rpx => px 的转换系数
+ * @returns { number } factor 单位转换系数 1rpx = factor * px
+ */
+ export const getFactor = () => {
+  const sysInfo = Taro.getSystemInfoSync();
+  const { screenWidth } = sysInfo;
+  return screenWidth / 750;
+};
+
+/**
+ * rpx => px 单位转换
+ * @param { number } rpx - 需要转换的数值
+ * @param { number } factor - 转化因子
+ * @returns { number }
+ */
+
+
+export const toPx = (rpx, factor?) => {
+  return parseInt(String(rpx * (factor || getFactor())), 10);
+}
+
+
+/**
+ * px => rpx 单位转换
+ * @param { number } px - 需要转换的数值
+ * @param { number } factor - 转化因子
+ * @returns { number }
+ */
+export const toRpx = (px, factor = getFactor()) =>
+  parseInt(String(px / factor), 10);
 
 export function isAndroid() {
   const u = navigator.userAgent;

@@ -1,48 +1,84 @@
 import Taro, { ShareAppMessageObject, useShareAppMessage } from "@tarojs/taro"
 import useStateRef from "react-usestateref"
+import { View } from '@tarojs/components';
+import { Loading } from "@taroify/core";
 
 
-export function useGetList(api: (...arg) => Promise<any>, params) {
-  const [list, setList, refList] = useStateRef<any[]>([])
-  const [page, setPage, refPage] = useStateRef(1)
-  const [loading, setLoading, refLoading] = useStateRef(false)
-  const [noData, setNoData, refNoData] = useStateRef(false)
-  async function getList(inParams = {}, concat?) {
-    if (refNoData.current) {
+
+
+interface AsyncData {
+  current_page: string | number
+  data: any[]
+  last_page: number
+  total: number
+}
+
+
+export function useGetList() {
+  const [, setList, list] = useStateRef<any[]>([])
+  const [, setPage, page] = useStateRef(1)
+  const [, setLoading, loading] = useStateRef(false)
+  const [, setNoData, noData] = useStateRef(false)
+  const [, setTotal, total] = useStateRef(0)
+  async function getListAction(asyncData: () => Promise<any>) {
+    if (total.current === list.current.length && total.current != 0) {
+      // 满数据
+      setNoData(true)
       return
     }
-    if (refLoading.current) {
+    if (loading.current) {
       return
     }
-    setLoading(true)
-    Taro.showLoading()
-    return api({ ...params, ...inParams, page: refPage.current }).then(res => {
-      Taro.hideLoading()
-      setLoading(false)
-      if (!res) {
-        return [];
-      }
-      if (refList.current.length === res.total) {
-        setNoData(true)
-        return []
-      }
-      if (concat === 'concat') {
-        setList(list.concat(res.data));
+    if (page.current === 1) {
+      Taro.showLoading({
+        title: '加载中...'
+      })
+    } else {
+      setLoading(true)
+    }
+    asyncData().then((res: AsyncData) => {
+      if (page.current === 1) {
+        Taro.hideLoading()
       } else {
-        setList(res.data);
+        setLoading(false)
       }
-      return res
+      if (!res) {
+        return
+      }
+      setTotal(res.total)
+      if (res.current_page == 1) {
+        setList(res.data)
+      } else {
+        setList(t => ([...t, ...res.data]))
+      }
     })
   }
-  async function next(inParams = {}) {
-    setPage(refPage.current + 1)
-    return getList(inParams, 'concat')
-  }
-  async function reLoad(inParams = {}) {
+  function reLoadAction(asyncData: () => Promise<any>) {
+    setNoData(false)
+    setLoading(false)
     setPage(1)
-    return getList(inParams)
+    getListAction(asyncData)
   }
-  return { refList, getList, next, reLoad, refLoading, refNoData }
+  function nextAction(asyncData: () => Promise<any>) {
+    if (loading.current) {
+      return
+    }
+    setPage(t => t + 1)
+    getListAction(asyncData)
+  }
+  function renderAction(Item: any) {
+    return <View className='lsmi-hooks-list pb-[46px]'>
+      {
+        list.current.map((item, index) => {
+          return Item(item, index)
+        })
+      }
+      <View style={{ display: noData.current ? 'block' : 'none', color: '#ccc' }} className='no-data py-2 text-[24px] text-center w-full' >没有更多数据了~</View>
+      {/* style={{ display: loading.current ? 'flex' : 'none' }} */}
+      <Loading style={{ display: loading.current ? 'flex' : 'none' }} size='24px' >加载中...</Loading>
+    </View>
+  }
+  return { renderAction, nextAction, reLoadAction, page }
 }
 
 

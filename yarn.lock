@@ -1327,13 +1327,13 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@taroify/core@^0.1.0-alpha.1":
-  version "0.1.0-alpha.1"
-  resolved "https://registry.npmmirror.com/@taroify/core/-/core-0.1.0-alpha.1.tgz#980a29f2088bd20fed5415767f0d00b336e64c9b"
-  integrity sha512-RCS/YQVr9YTqDkYqPh0GpottIqAyR7O9CfSxSz51c/HqLU0U4DA3ykPMor9k3d6K5A3wFzw++r61RkEfzp9+UA==
+"@taroify/core@0.0.29-alpha.8":
+  version "0.0.29-alpha.8"
+  resolved "https://registry.npmmirror.com/@taroify/core/-/core-0.0.29-alpha.8.tgz#12b1eaa6c18b84e943a601f763fbcee2637c140e"
+  integrity sha512-y53uZcl/xMcnLsefkMYJOxooYgEkrOFiT+HxJWuOIyPHyL9WTd8MJnNQVkNQWTQkRNwP0S3oO+/Fkku/cVy/Bw==
   dependencies:
-    "@taroify/hooks" "^0.1.0-alpha.1"
-    "@taroify/icons" "^0.1.0-alpha.1"
+    "@taroify/hooks" "^0.0.29-alpha.8"
+    "@taroify/icons" "^0.0.29-alpha.8"
     classnames "^2.2.6"
     lodash "^4.17.21"
     promise "^8.1.0"
@@ -1341,17 +1341,17 @@
     react-is "^17.0.2"
     react-transition-group "^4.4.1"
 
-"@taroify/hooks@^0.1.0-alpha.1":
-  version "0.1.0-alpha.1"
-  resolved "https://registry.npmmirror.com/@taroify/hooks/-/hooks-0.1.0-alpha.1.tgz#ed18faefa908803033e72713bc94454c4ee80dea"
-  integrity sha512-hYpivC4WUP1DAT2Hy1xHSB54DvJWHqgG9wrbeoc0EuRSeKEVesnDp83bB68cYjovWv+aoAszefpL1h55XKQVVA==
+"@taroify/hooks@^0.0.29-alpha.8":
+  version "0.0.29-alpha.9"
+  resolved "https://registry.npmmirror.com/@taroify/hooks/-/hooks-0.0.29-alpha.9.tgz#3f1f488586ac0eae27d011f55612c9444652489d"
+  integrity sha512-uHFvjqRR4/Hap6Shlk7cNljVSHpUoA8Wo+TLiz1YXu3isuYGTQWWJoNeRvEfw2mvryYQYUDirZwDZ1RIrLuMoQ==
   dependencies:
     "@vant/area-data" "^1.2.1"
 
-"@taroify/icons@^0.1.0-alpha.1":
-  version "0.1.0-alpha.1"
-  resolved "https://registry.npmmirror.com/@taroify/icons/-/icons-0.1.0-alpha.1.tgz#2748f2f9b561fdc8181465eb20981449ba0e5d4d"
-  integrity sha512-KGcsPoug16JvhsnfQi8cgYXBgT4wrTwyJ1CL6owiD9ro+Iokx64rQ8NnCkreJMKTj88y3THRNz/UyHh3/92t2g==
+"@taroify/icons@^0.0.29-alpha.8":
+  version "0.0.29-alpha.9"
+  resolved "https://registry.npmmirror.com/@taroify/icons/-/icons-0.0.29-alpha.9.tgz#4c7d075ff8b1353fc2d0aff4c3ff35d092cc4ce6"
+  integrity sha512-nAeSefjKLgqcE3WhPMdaghKVbKtw9kqKYClY9OeHrqdiU8wX41duab0KfqDME76oaGkLBrkgmOuNsqoQ0Q5Urw==
   dependencies:
     classnames "^2.2.6"
 

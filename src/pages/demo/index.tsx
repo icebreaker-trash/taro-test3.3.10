@@ -9,17 +9,18 @@
  * @FilePath: \taro-tsx-temp\src\pages\temp\index.tsx
  */
 import { inject, observer } from 'mobx-react'
-import { View, RichText, Button } from '@tarojs/components'
-import { Image, DatetimePicker, Popup } from '@antmjs/vantui'
-import { DatetimePicker as DatetimePickerRo, Popup as PopupRo } from '@taroify/core'
+import { View, RichText } from '@tarojs/components'
+import { Image, DatetimePicker, Popup, Icon, NavBar } from '@antmjs/vantui'
 import { DatetimePickerProps } from '@antmjs/vantui/types/datetime-picker'
 import React, { useCallback, useEffect, useState } from 'react'
+import { Button } from '@taroify/core'
 import Taro, { useDidShow, usePullDownRefresh, useReachBottom, useReady, useRouter, useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import useStateRef from 'react-usestateref'
 import { UserStore } from '@/types/store'
 import { getCurrentPageUrlWithArgs, watch } from '@/utils/index'
 import $api from '@/api/index';
 import ParseComp from '@/components/parse/index'
+import { useGetList } from '@/hooks/index'
 import './index.scss'
 
 interface Props {
@@ -32,16 +33,22 @@ interface InfoData {
   minDate: DatetimePickerProps['minDate'];
   maxDate: DatetimePickerProps['maxDate'];
   currentDate: any
+  page: number
 }
 
 const Index: React.FC<Props> = ({ user }) => {
   const router = useRouter()
+  const { reLoadAction, nextAction, page, renderAction } = useGetList()
+  const [, setResData, resData] = useStateRef<{ list: any[] }>({
+    list: []
+  })
   const [, setInfoData, infoData] = useStateRef<InfoData>({
     name: '',
     articleInfo: {},
     minDate: new Date(2018, 0, 1).getTime(),
     maxDate: new Date(2022, 0, 1).getTime(),
     currentDate: null,
+    page: 1
   })
   const [, setFlagData, flagData] = useStateRef({
     popupFlag: false
@@ -60,7 +67,8 @@ const Index: React.FC<Props> = ({ user }) => {
   })
 
   useReachBottom(() => {
-    console.log('useReachBottom')
+    // setInfoData(t => ({ ...t, page: t.page + 1 }))
+    // getNewsList('concat')
   })
   // 下拉刷新
   usePullDownRefresh(() => {
@@ -70,27 +78,26 @@ const Index: React.FC<Props> = ({ user }) => {
     });
   })
   useDidShow(() => {
-    console.log('show')
+
   })
   useEffect(() => {
     // 获取不到dom
-    console.log('one effect')
     initAction()
   }, [])
   useReady(() => {
     // dom挂载完毕
     getHomeDomAction()
-    console.log('mounted')
   })
 
   function initAction() {
     watch(() => {
       getNewsDetailAction()
+      // getNewsListAction()
+      reLoadAction(this.getNewsListAction())
     })
     setTimeout(() => {
       setInfoData(state => ({ ...state, name: 'msg' }))
       setInfoData(state => ({ ...state, name: 'msg23' }))
-      console.log(infoData.current, 'curt')
       Taro.nextTick(() => {
         getHomeDomAction()
       })
@@ -100,25 +107,35 @@ const Index: React.FC<Props> = ({ user }) => {
   function getNewsDetailAction() {
     // console.log(Taro.ENV_TYPE.WEAPP, 'jd')
     // console.log(Taro.getEnv(), 'getEnv')
-    // 29
-    $api.getNewsDetail({ news_id: 17 }).then(res => {
+    // 29  17
+    $api.getNewsDetail({ news_id: 21 }).then(res => {
       if (!res) {
         return
       }
       setInfoData(state => ({ ...state, articleInfo: res }))
     })
   }
+  async function getNewsListAction(concat?){
+    return $api.getNewsList({ page: page.current }).then(res => {
+      if(!res){
+        return
+      }
+      if(concat){
+        setResData(t => ({ ...t, list: t.list.concat(res.data) }))
+      }else{
+        setResData(t => ({ ...t, list: res.data }))
+      }
+      return res
+    })
+  }
 
   function getHomeDomAction() {
     const query = Taro.createSelectorQuery()
-    query.select('#Home').boundingClientRect((res) => {
-      console.log(res, 'res')
-    }).exec()
   }
 
-  const onInput = (e) => {
-    console.log(e, 'eee')
-  }
+  const confirmAction = useCallback((e) => {
+    console.log(e, 'ee')
+  }, [])
 
   const closeAction = useCallback(() => {
     setFlagData({ popupFlag: false })
@@ -133,37 +150,40 @@ const Index: React.FC<Props> = ({ user }) => {
   const [value, setValue] = useState(new Date(2022, 10, 14))
   return (
     <View id='Home' className=' '>
+      <NavBar
+        title='标题'
+        fixed
+        placeholder
+        leftText=''
+        leftArrow
+        safeAreaInsetTop={false}
+        style="background: '#abcdef'"
+      />
       <View className=' w-32 bg-green-200'>
         <View className=' m-2'>000</View>
       </View>
       <Button onClick={openPopupAction}>show</Button>
+      <Button color='info'>信息按钮</Button>
+      <Button color='success'>成功按钮</Button>
+      <Button color='warning'>警告按钮</Button>
+      <Button color='danger'>危险按钮</Button>
+      <Button color='default'>默认按钮</Button>
       <View className='px-[32px] content text-[28px] text-justify'>
-        {/* <ParseComp content={infoData.current.articleInfo.content} tagStyle={{ img: '', p: 'margin: 10px 0' }}></ParseComp> */}
-        <Popup position='bottom' show={flagData.current.popupFlag} onClose={closeAction}>
+        {/* <ParseComp content={infoData.current.articleInfo.content} tagStyle={{ img: 'width: 100%', p: 'margin: 10px 0' }}></ParseComp> */}
+        <Popup style={{ background: 'red' }} position='bottom' show={flagData.current.popupFlag} onClose={closeAction}>
           <DatetimePicker
             type='datetime'
             value={infoData.current.currentDate}
             minDate={infoData.current.minDate}
             maxDate={infoData.current.maxDate}
-            onInput={onInput}
+            onConfirm={confirmAction}
           />
         </Popup>
-        {/* <PopupRo open={flagData.current.popupFlag} placement='bottom'>
-          <DatetimePickerRo
-            type='date'
-            min={minDate}
-            max={maxDate}
-            defaultValue={defaultValue}
-            value={value}
-            onChange={onInput}
-          >
-            <DatetimePickerRo.Toolbar>
-              <DatetimePickerRo.Button>取消</DatetimePickerRo.Button>
-              <DatetimePickerRo.Title>选择年月日</DatetimePickerRo.Title>
-              <DatetimePickerRo.Button>确认</DatetimePickerRo.Button>
-            </DatetimePickerRo.Toolbar>
-          </DatetimePickerRo>
-        </PopupRo> */}
+        {
+          resData.current.list.map((item, index) => (
+            <View key={item.id} className=' text-black p-4 mb-2 bg-purple-100'>{item.title}</View>
+          ))
+        }
       </View>
     </View>
   )

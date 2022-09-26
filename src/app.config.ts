@@ -2,7 +2,8 @@ export default {
   pages: [
     'pages/index/index',
     'pages/demo/index',
-    'pages/tcss/index'
+    'pages/tcss/index',
+    'pages/test-hooks/index'
   ],
   subPackages: [
     {

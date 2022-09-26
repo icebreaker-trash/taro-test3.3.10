@@ -34,7 +34,7 @@ export async function login(params?) {
     //   })
     // }
   }
-  setLoginState(true)
   Taro.hideLoading()
+  setLoginState(true)
   return data1
 }

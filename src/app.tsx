@@ -69,11 +69,12 @@ import './app.scss'
 const App = ({ children }) => {
 
   useEffect(() => {
+    console.log(getCurrentInstance().router, 'getCurrentInstance().router')
     login(getCurrentInstance().router)
   }, [])
 
   useEffect(() => {
-    console.log(getCurrentInstance().router, 'getCurrentInstance().router')
+    // console.log(getCurrentInstance().router, 'getCurrentInstance().router')
   }, [getCurrentInstance().router])
 
   return <Provider {...store}>{children}</Provider>;

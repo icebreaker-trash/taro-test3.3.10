@@ -29,7 +29,7 @@
   "dependencies": {
     "@antmjs/vantui": "^2.2.0",
     "@babel/runtime": "^7.7.7",
-    "@taroify/core": "^0.1.0-alpha.1",
+    "@taroify/core": "0.0.29-alpha.8",
     "@tarojs/components": "3.3.10",
     "@tarojs/react": "3.3.10",
     "@tarojs/runtime": "3.3.10",

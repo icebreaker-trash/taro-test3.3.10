@@ -33,6 +33,9 @@ export default {
   getNewsDetail (data?) {
     return axios({ url: '/index/index/getNewsDetail', data })
   },
+  getNewsList (data?) {
+    return axios({ url: '/index/index/getNewsList', data })
+  },
   upload (path) {
     return axios({
       url: '/index/plug/upload',
