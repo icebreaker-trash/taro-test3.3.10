@@ -15,6 +15,10 @@ const loginOb: LoginOb = {
   isLogin: false,
   fnList: []
 }
+
+export function protoString(params: any){
+  return Object.prototype.toString.call(params)
+}
 /**
  * 获取 rpx => px 的转换系数
  * @returns { number } factor 单位转换系数 1rpx = factor * px

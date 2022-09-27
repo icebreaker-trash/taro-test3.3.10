@@ -20,7 +20,6 @@ import { UserStore } from '@/types/store'
 import { getCurrentPageUrlWithArgs, watch } from '@/utils/index'
 import $api from '@/api/index';
 import ParseComp from '@/components/parse/index'
-import { useGetList } from '@/hooks/index'
 import './index.scss'
 
 interface Props {
@@ -38,7 +37,6 @@ interface InfoData {
 
 const Index: React.FC<Props> = ({ user }) => {
   const router = useRouter()
-  const { reLoadAction, nextAction, page, renderAction } = useGetList()
   const [, setResData, resData] = useStateRef<{ list: any[] }>({
     list: []
   })
@@ -92,8 +90,6 @@ const Index: React.FC<Props> = ({ user }) => {
   function initAction() {
     watch(() => {
       getNewsDetailAction()
-      // getNewsListAction()
-      reLoadAction(this.getNewsListAction())
     })
     setTimeout(() => {
       setInfoData(state => ({ ...state, name: 'msg' }))
@@ -113,19 +109,6 @@ const Index: React.FC<Props> = ({ user }) => {
         return
       }
       setInfoData(state => ({ ...state, articleInfo: res }))
-    })
-  }
-  async function getNewsListAction(concat?){
-    return $api.getNewsList({ page: page.current }).then(res => {
-      if(!res){
-        return
-      }
-      if(concat){
-        setResData(t => ({ ...t, list: t.list.concat(res.data) }))
-      }else{
-        setResData(t => ({ ...t, list: res.data }))
-      }
-      return res
     })
   }
 

@@ -1,0 +1,10 @@
+$fix: lsmi-input_comp;
+
+
+.#{$fix}__clear-icon{
+  transition: all 0.2s ease;
+  transform: translateX(100%);
+}
+.#{$fix}__clear-active{
+  transform: translateX(0);
+}
