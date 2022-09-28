@@ -12,14 +12,15 @@ import { inject, observer } from 'mobx-react'
 import { View } from '@tarojs/components'
 import React, { useCallback, useEffect , useState } from 'react'
 import Taro, { useDidShow, usePullDownRefresh, useReachBottom, useReady, useRouter, useShareAppMessage, useShareTimeline } from '@tarojs/taro'
-import { Button } from '@taroify/core'
+import { Button, Dialog } from '@taroify/core'
 import useStateRef from 'react-usestateref'
 import { UserStore } from '@/types/store'
-import { getCurrentPageUrlWithArgs, watch } from '@/utils/index'
-import { useGetNextList, checkObj } from '@/hooks'
+import { getCurrentPageUrlWithArgs, watch , checkObj } from '@/utils/index'
+import { useGetNextList } from '@/hooks'
 import Input from '@/components/input'
 import $api from '@/api/index';
 import classNames from 'classnames';
+import TestDialog from '@/components/test-dialog'
 import './index.scss'
 
 

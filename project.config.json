@@ -5,9 +5,11 @@
   "appid": "wx5e4f082fe81ab9aa",
   "setting": {
     "urlCheck": true,
-    "es6": false,
     "postcss": false,
-    "minified": false
+    "minified": false,
+    "es6": true,
+    "newFeature": true,
+    "bigPackageSizeSupport": true
   },
   "compileType": "miniprogram"
 }

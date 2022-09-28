@@ -1,4 +1,4 @@
-import Taro, { ShareAppMessageObject, useShareAppMessage } from "@tarojs/taro"
+import Taro, { ShareAppMessageObject, useRouter, useShareAppMessage } from "@tarojs/taro"
 import useStateRef from "react-usestateref"
 import { View } from '@tarojs/components';
 import { Loading, Empty, Button } from "@taroify/core";
@@ -155,87 +155,6 @@ export function useGetList() {
   return { renderAction, reLoadAction }
 }
 
-// 检查对象键值对
-export function checkObj(obj, rules) {
-  for (const k in obj) {
-    if (protoString(obj[k]) === '[object Object]' && JSON.stringify(obj[k]) === '{}') {
-      Taro.showToast({
-        title: rules[k],
-        icon: 'none',
-      })
-      return false
-    } else if (protoString(obj[k]) === '[object Array]' && !obj[k].length) {
-      Taro.showToast({
-        title: rules[k],
-        icon: 'none',
-      })
-      return false
-    }
-    if (!obj[k]) {
-      Taro.showToast({
-        title: rules[k],
-        icon: 'none',
-      })
-      return false
-    }
-  }
-  return true
-}
+// 
 
-
-// 下载文件
-export function downFileAction(file: string) {
-  // 临时文件
-  return new Promise((resolve, reject) => {
-    if (file.includes('/tmp')) {
-      resolve(file)
-      return file
-    }
-    Taro.downloadFile({
-      url: file,
-      success: (res) => {
-        resolve(res)
-      }
-    })
-  })
-}
-
-// 保存文件
-export async function saveImageFileAction(file: string){
-  const res: any = await downFileAction(file)
-  Taro.saveImageToPhotosAlbum({
-    filePath: res,
-    success: () => {
-      Taro.showToast({
-        title: '保存成功!',
-        icon: 'success',
-        mask: true
-      })
-    },
-    fail: () => {
-      Taro.showToast({
-        title: '保存失败!',
-        icon: 'none',
-        mask: true
-      })
-    }
-  })
-}
-
-// 打开文档
-export async function openDocAction(file: string, fileType?: keyof Taro.openDocument.fileType){
-  const res: any = await downFileAction(file)
-  Taro.openDocument({
-    filePath: res,
-    fileType: fileType || 'pdf',
-    success: () => {},
-    fail: () => {
-      Taro.showToast({
-        title: '打开失败!',
-        icon: 'none',
-        mask: true
-      })
-    }
-  })
-}
 

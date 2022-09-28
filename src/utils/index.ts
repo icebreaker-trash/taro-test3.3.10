@@ -1,8 +1,9 @@
-import Taro, { getCurrentPages } from '@tarojs/taro'
+import Taro, { getCurrentPages, useRouter } from '@tarojs/taro'
 // import { wxLogin } from '@/hooks/index'
 import { StoreConfigNameCollect } from '@/config'
 import userStore from '@/store/modules/user'
 import $api from '@/api/index'
+import * as _ from "lodash"
 
 let a = 0
 interface LoginOb {
@@ -320,4 +321,105 @@ export function decode(data) {
   if (leftbits) throw 'Corrupted base64 string'
   var result = decodeURIComponent(escape(result))
   return result
+}
+
+
+// 检查对象键值对
+export function checkObj(obj, rules) {
+  for (const k in obj) {
+    if (protoString(obj[k]) === '[object Object]' && JSON.stringify(obj[k]) === '{}') {
+      Taro.showToast({
+        title: rules[k],
+        icon: 'none',
+      })
+      return false
+    } else if (protoString(obj[k]) === '[object Array]' && !obj[k].length) {
+      Taro.showToast({
+        title: rules[k],
+        icon: 'none',
+      })
+      return false
+    }
+    if (!obj[k]) {
+      Taro.showToast({
+        title: rules[k],
+        icon: 'none',
+      })
+      return false
+    }
+  }
+  return true
+}
+
+
+// 下载文件
+export function downFileAction(file: string) {
+  // 临时文件
+  return new Promise((resolve, reject) => {
+    if (file.includes('/tmp')) {
+      resolve(file)
+      return file
+    }
+    Taro.downloadFile({
+      url: file,
+      success: (res) => {
+        resolve(res)
+      }
+    })
+  })
+}
+
+// 保存文件
+export async function saveImageFileAction(file: string){
+  const res: any = await downFileAction(file)
+  Taro.saveImageToPhotosAlbum({
+    filePath: res,
+    success: () => {
+      Taro.showToast({
+        title: '保存成功!',
+        icon: 'success',
+        mask: true
+      })
+    },
+    fail: () => {
+      Taro.showToast({
+        title: '保存失败!',
+        icon: 'none',
+        mask: true
+      })
+    }
+  })
+}
+
+// 打开文档
+export async function openDocAction(file: string, fileType?: keyof Taro.openDocument.fileType){
+  const res: any = await downFileAction(file)
+  Taro.openDocument({
+    filePath: res,
+    fileType: fileType || 'pdf',
+    success: () => {},
+    fail: () => {
+      Taro.showToast({
+        title: '打开失败!',
+        icon: 'none',
+        mask: true
+      })
+    }
+  })
+}
+
+export function getElementSelector(id?: string, className?: string) {
+  const selectors: string[] = []
+  if (!_.isEmpty(id)) {
+    selectors.push(`#${id}`)
+  }
+  if (!_.isEmpty(className)) {
+    selectors.push(_.split(className, " ").join("."))
+  }
+  return selectors.join(".")
+}
+
+export function usePrependPageSelector(selector?: string) {
+  const { path } = useRouter()
+  return path ? `${path}__${selector}` : selector
 }

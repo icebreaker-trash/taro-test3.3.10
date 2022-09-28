@@ -3,6 +3,7 @@ import Taro from '@tarojs/taro'
 import store from '@/store/index'
 import { CONSOLE_REQUEST_ENABLE, CONSOLE_RESPONSE_ENABLE } from '..'
 
+
 export function requestSuccessFunc (requestObj) {
   CONSOLE_REQUEST_ENABLE &&
     console.info('requestInterceptorFunc', `url: ${requestObj.url}`, requestObj)

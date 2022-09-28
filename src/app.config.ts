@@ -3,7 +3,8 @@ export default {
     'pages/index/index',
     'pages/demo/index',
     'pages/tcss/index',
-    'pages/test-hooks/index'
+    'pages/test-hooks/index',
+    'pages/tcomp/index'
   ],
   subPackages: [
     {
