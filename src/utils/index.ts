@@ -117,9 +117,9 @@ export function setLoginState(val) {
   loginOb.isLogin = val
 }
 
-export function getUserInfo(fn) {
+export function getUserInfo(fn?) {
   return new Promise((resolve, reject) => {
-    if (!userStore.userInfo || !userStore.userInfo.nickname || new Date().getTime() - Taro.getStorageSync('login') > 7 * 24 * 60 * 60 * 1000) {
+    if (!userStore.userInfo?.nickname || new Date().getTime() - Taro.getStorageSync('login') > 7 * 24 * 60 * 60 * 1000) {
       Taro.getUserProfile({
         desc: '用于完善会员资料', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
         success: async (res) => {

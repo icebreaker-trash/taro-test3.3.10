@@ -1,0 +1,40 @@
+.lsmi-auth-comp {
+  @apply flex flex-col items-center justify-center;
+  padding: 20px;
+  .title{
+    font-size: 40px;
+    font-weight: bold;
+    text-align: center;
+  }
+  .content{
+    font-size: 26px;
+    margin-top: 46px;
+    line-height: 1.8;
+    padding: 0 42px;
+    text-align: justify;
+    .row1{
+      margin-bottom: 20px;
+    }
+    .book{
+      color: #0B7CFE;
+    }
+  }
+  .btn-group{
+    margin-top: 44px;
+    padding: 0 80px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .btn{
+      width: 100%;
+      margin-bottom: 30px;
+      font-weight: bold;
+      margin-right: 30px;
+    }
+    .btn2{
+      border-color: #999999;
+      color: #888888;
+    }
+  }
+}

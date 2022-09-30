@@ -16,6 +16,7 @@ import useStateRef from 'react-usestateref'
 import { UserStore } from '@/types/store'
 import { Button } from '@taroify/core'
 import { getCurrentPageUrlWithArgs, watch } from '@/utils/index'
+import MyDialog from '@/components/test-dialog/index'
 // 引入组件对应的样式，若组件没有样式文件，则无须引入
 import './index.scss'
 
@@ -30,23 +31,37 @@ interface InfoData {
 const Index: React.FC<Props> = ({ user }) => {
 
   useEffect(() => {
-    
+    // setTimeout(() => {
+    //   MyDialog.show({
+    //     show: true,
+    //     onClose: () => {
+    //       console.log('close')
+    //     }
+    //   })
+    // }, 0)
   },[])
   function userInfoAction(){
-    // Taro.getUserProfile({
-    //   desc: 'mmmm',
-    //   success: (res) => {
-    //     console.log(res, 'res')
-    //   }
-    // })
+    Taro.getUserProfile({
+      desc: 'mmmm',
+      success: (res) => {
+        console.log(res, 'res')
+      }
+    })
   }
   function getPhoneNumber(e){
     console.log(e, 'e')
   }
+  function openAuthAction(){
+    MyDialog.show({
+      show: true
+    })
+  }
   return (
     <View>
+      <MyDialog></MyDialog>
       <Button onClick={userInfoAction}>user info</Button>
       <Button openType='getPhoneNumber' onGetPhoneNumber={getPhoneNumber}>user phone</Button>
+      <Button onClick={openAuthAction}>打开</Button>
     </View>
   )
 }
