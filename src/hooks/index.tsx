@@ -77,15 +77,19 @@ export function useGetNextList() {
     setPage(1)
     getListAction(cacheApiFn)
   }
-  function renderAction(Item: any) {
+  interface Props {
+    children?: any
+    emptyStyle?: React.CSSProperties
+  }
+  function renderAction({ children, emptyStyle }: Props) {
     return <View className='lsmi-hooks-list pb-[46px]'>
       {
         list.current.map((item, index) => {
-          return Item(item, index)
+          return children(item, index)
         })
       }
       {
-        !list.current.length && <Empty>
+        !list.current.length && <Empty style={emptyStyle || {}}>
           <Empty.Image />
           <Empty.Description>
             <View className=' flex items-center justify-center'>
@@ -102,6 +106,10 @@ export function useGetNextList() {
       {/* style={{ display: loading.current ? 'flex' : 'none' }} */}
       <Loading style={{ display: loading.current ? 'flex' : 'none' }} size='24px' >加载中...</Loading>
     </View>
+  }
+  renderAction.defaultProps = {
+    children: () => {},
+    emptyStyle: {}
   }
   return { renderAction, nextAction, reLoadAction, page }
 }

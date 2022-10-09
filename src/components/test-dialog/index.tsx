@@ -1,6 +1,7 @@
 import { View, Text, RichText } from '@tarojs/components'
 import { useState, useEffect, useCallback } from 'react'
 import { Popup, Button } from '@taroify/core'
+import Taro from '@tarojs/taro'
 import { getUserInfo, watch } from '@/utils/index'
 import $api from '@/api/index'
 import userStore from '@/store/modules/user'

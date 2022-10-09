@@ -35,7 +35,7 @@ interface InfoData {
 }
 
 const Index: React.FC<Props> = ({ user }) => {
-  const { reLoadAction, nextAction, page, renderAction } = useGetNextList()
+  const { reLoadAction, nextAction, page, renderAction: RenderAction } = useGetNextList()
   const [inputVal, setInputVal] = useState('')
 
   useReachBottom(() => {
@@ -94,7 +94,12 @@ const Index: React.FC<Props> = ({ user }) => {
       </View>
 
       <View className='list px-2'>
-        {renderAction((item, index) => <View key={item.id} className=' text-black p-8 mb-2 bg-purple-100'>{item.title}</View>)}
+        <RenderAction>
+          {
+            (item, index) => <View key={item.id} className=' text-black p-8 mb-2 bg-purple-100'>{item.title}</View>
+          }
+        </RenderAction>
+        {/* {renderAction((item, index) => <View key={item.id} className=' text-black p-8 mb-2 bg-purple-100'>{item.title}</View>)} */}
       </View>
     </View>
   )
