@@ -8,10 +8,18 @@
 import { CommonStore } from '@/types/store'
 import { observable } from 'mobx'
 
+interface NewCommonStore {
+  setEdtUserInfo: (val: any) => void
+  setCategoryInfo: (val: any) => void
+  setGoodsInfo: (val: any) => void
+  setErrorInfo: (val: any) => void
+}
+
 const common = observable({
   categoryInfo: null,
   goodsInfo: null,
   editUserInfo: null,
+  errorInfo: null,
   setEdtUserInfo(val){
     common.editUserInfo = val
   },
@@ -21,6 +29,9 @@ const common = observable({
   setGoodsInfo(val){
     common.goodsInfo = val
   },
-} as CommonStore)
+  setErrorInfo(val){
+    common.errorInfo = val
+  }
+} as CommonStore & NewCommonStore)
 
 export default common

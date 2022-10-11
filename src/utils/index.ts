@@ -3,6 +3,7 @@ import Taro, { getCurrentPages, useRouter } from '@tarojs/taro'
 import { StoreConfigNameCollect } from '@/config'
 import userStore from '@/store/modules/user'
 import $api from '@/api/index'
+import commonStore from '@/store/modules/common'
 import * as _ from "lodash"
 
 let a = 0
@@ -10,7 +11,6 @@ interface LoginOb {
   isLogin: boolean
   fnList: Function[]
 }
-
 
 const loginOb: LoginOb = {
   isLogin: false,
@@ -422,4 +422,68 @@ export function getElementSelector(id?: string, className?: string) {
 export function usePrependPageSelector(selector?: string) {
   const { path } = useRouter()
   return path ? `${path}__${selector}` : selector
+}
+
+// 报错上报
+export function handleError() {
+  const oldError = console.error;
+  console.error = function (error) {
+    if (error != '参数有缺失') {
+      const message = error.message;
+      const stack = error.stack;
+      let row = 0, column = 0, url: any = null;
+      if (stack) {
+        let mres = stack.match(/\(.*?\)/g) || []
+        let firstLine = (mres[0] || "").replace("(", "").replace(")", "") // 获取到堆栈信息的第一条
+
+        // 根据:分隔获取行列
+        let info = firstLine.split(':')
+        row = info[info.length - 2] // 行
+        column = info[info.length - 1] // 列
+        // 获取报错文件url
+        url = [...info].slice(0, info.length - 2).join(':');
+      }
+      setTimeout(function () {
+        // 上报错误内容
+        let opt = {
+          url,
+          row,
+          column,
+          message,
+          stack // 错误堆栈信息
+        }
+        commonStore.setErrorInfo(`全局捕获:${error} || ${JSON.stringify(opt)}`)
+        // $api.reportTerminalException({ stackTraceInfo: `全局捕获:${error} || ${JSON.stringify(opt)}` })
+        // 控制台打印的错误信息
+        // console.log(error, 'error')
+        // console.log(opt, 'opt')
+        //进行上报的方法
+      }, 0);
+    }
+    return oldError.apply(console, arguments);
+  };
+} 
+
+// 检查小程序更新
+export function wxMiniUpdate() {
+  const updateManager = Taro.getUpdateManager()
+  updateManager.onCheckForUpdate(function (res) {
+    // 请求完新版本信息的回调
+    // console.log(res.hasUpdate)
+  })
+  updateManager.onUpdateReady(function () {
+    Taro.showModal({
+      title: '更新提示',
+      content: '新版本已经准备好，是否重启应用？',
+      success(res) {
+        if (res.confirm) {
+          // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
+          updateManager.applyUpdate()
+        }
+      }
+    })
+  })
+  updateManager.onUpdateFailed(function () {
+    // 新版本下载失败
+  })
 }

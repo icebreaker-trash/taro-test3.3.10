@@ -39,6 +39,7 @@ const Index: React.FC<Props> = ({ user }) => {
     //     }
     //   })
     // }, 0)
+    testApiAction()
   },[])
   function userInfoAction(){
     Taro.getUserProfile({
@@ -54,6 +55,26 @@ const Index: React.FC<Props> = ({ user }) => {
   function openAuthAction(){
     MyDialog.show({
       show: true
+    })
+  }
+  function testApiAction(){
+    Taro.request({
+      url: 'http://www.kitco.cn/KitcoDynamicSite/RequestHandler?requestName=getFileContent&AttributeId=PreciousLiveQuote',
+      method: 'GET',
+    }).then(res => {
+      const data: string = res.data
+      // console.log(data, 'data')
+      const a = data.match(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)
+      console.log(a, 'a')
+      // const a = data.replace(/<tr[^>]*>([\s\S]*?)<\/tr>/ig, (v, v2) => {
+      //   console.log(v)
+      // })
+      // 铂
+      const bo = a[4].match(/<td[^>]*>([\s\S]*?)<\/td>/ig)
+      console.log(bo[4], '铂')
+      bo[4].replace(/(?<=(<td[^>]*?>)).*?(?=(<\/td>))/ig, (v) => {
+        console.log(v, 'vvv')
+      })
     })
   }
   return (

@@ -2,9 +2,11 @@ import { Component, useEffect } from 'react'
 import sr from 'sr-sdk-wxapp'
 import store from '@/store/index'
 import { login } from '@/hooks/wx-login'
-import { getCurrentInstance } from '@tarojs/taro'
+import Taro, { getCurrentInstance } from '@tarojs/taro'
+
 import { Provider } from 'mobx-react'
 import './app.scss'
+import { wxMiniUpdate, handleError } from './utils'
 
 /**
    * 有数埋点SDK 默认配置
@@ -67,8 +69,11 @@ import './app.scss'
 // }
 
 const App = ({ children }) => {
-
+  handleError()
   useEffect(() => {
+    if(Taro.ENV_TYPE.WEAPP === Taro.getEnv()){
+      wxMiniUpdate()
+    }
     console.log(getCurrentInstance().router, 'getCurrentInstance().router')
     login(getCurrentInstance().router)
   }, [])

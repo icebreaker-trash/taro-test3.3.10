@@ -19,4 +19,5 @@ export interface CommonStore {
   categoryInfo: CommonObj,
   goodsInfo: CommonObj,
   editUserInfo: CommonObj,
+  errorInfo: any
 }

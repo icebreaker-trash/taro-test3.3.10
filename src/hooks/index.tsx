@@ -40,13 +40,18 @@ export function useGetNextList() {
     } else {
       setLoading(true)
     }
-    asyncData().then((res: AsyncData) => {
+    asyncData().then((res: AsyncData | any[]) => {
       if (page.current === 1) {
         Taro.hideLoading()
       } else {
         setLoading(false)
       }
       if (!res) {
+        return
+      }
+      if(Array.isArray(res)){
+        setList(res)
+        setNoData(true)
         return
       }
       setTotal(res.total)
@@ -114,54 +119,6 @@ export function useGetNextList() {
   return { renderAction, nextAction, reLoadAction, page }
 }
 
-export function useGetList() {
-  const [, setList, list] = useStateRef<any[]>([])
-
-  async function getListAction(asyncData: () => Promise<any>) {
-    Taro.showLoading({
-      title: '加载中...'
-    })
-    asyncData().then((res: any[]) => {
-      Taro.hideLoading()
-      if (!res) {
-        return
-      }
-      setList(res)
-    })
-  }
-  function reLoadAction(asyncData: () => Promise<any>) {
-    cacheApiFn = asyncData
-    getListAction(asyncData)
-  }
-  function referAction() {
-    getListAction(cacheApiFn)
-  }
-  function renderAction(Item: any) {
-    return <View className='lsmi-hooks-list pb-[46px]'>
-      {
-        list.current.map((item, index) => {
-          return Item(item, index)
-        })
-      }
-      {
-        !list.current.length && <Empty>
-          <Empty.Image />
-          <Empty.Description>
-            <View className=' flex items-center justify-center'>
-              <View className='text'>暂无数据</View>
-              <View className='btn ml-2 text-blue-400 py-2' style='text-decoration:underline' onClick={referAction}>
-                <Replay />
-                点击刷新
-              </View>
-            </View>
-          </Empty.Description>
-        </Empty>
-      }
-      <View className='no-data py-2 text-[24px] text-center w-full' >没有更多数据了~</View>
-    </View>
-  }
-  return { renderAction, reLoadAction }
-}
 
 // 
 

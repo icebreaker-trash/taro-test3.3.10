@@ -6,8 +6,10 @@
  * @FilePath: \taro-plaid-shop\src\utils\axios\request.ts
  */
 import Taro from '@tarojs/taro'
+import commonStore from '@/store/modules/common';
 import { AxiosRequestConfig, AxiosTransformer, Method } from './type'
 import { deepMerge } from './utils'
+
 
 export function flattenHeaders(headers: any, method: Method): any {
   if (!headers) {
@@ -47,10 +49,20 @@ export function platformHttpXHR(config: AxiosRequestConfig) {
   config.headers = flattenHeaders(config.headers, config.method!)
   // 适配小程序
   config.header = { ...config.headers }
+  config.fail = (err: any) => {
+    Taro.showModal({
+      title: '网络错误!',
+      content: err.errMsg || JSON.stringify(err),
+      showCancel: true,
+      success: ({  }) => { }
+    })
+    commonStore.setErrorInfo(err.errMsg || JSON.stringify(err))
+    throw new Error(err)
+  }
   delete config.headers
   if (config.upload) {
     return Taro.uploadFile(config as Taro.uploadFile.Option).then(res => {
-      if(config.validateStatus && config.validateStatus(res.statusCode)){
+      if (config.validateStatus && config.validateStatus(res.statusCode)) {
         // 先处理用户自定义的  transformResponse 
         res.data = transform(res.data, {}, config.transformResponse)
         return res.data
