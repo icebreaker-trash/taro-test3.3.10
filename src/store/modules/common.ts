@@ -16,7 +16,9 @@ interface NewCommonStore {
 }
 
 const common = observable({
-  categoryInfo: null,
+  categoryInfo: {
+    ids: 50
+  },
   goodsInfo: null,
   editUserInfo: null,
   errorInfo: null,

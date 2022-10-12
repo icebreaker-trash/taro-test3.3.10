@@ -16,6 +16,7 @@ import useStateRef from 'react-usestateref'
 import { UserStore } from '@/types/store'
 import { Button } from '@taroify/core'
 import { getCurrentPageUrlWithArgs, watch } from '@/utils/index'
+import commonStore from '@/store/modules/common'
 import MyDialog from '@/components/test-dialog/index'
 // 引入组件对应的样式，若组件没有样式文件，则无须引入
 import './index.scss'
@@ -79,6 +80,10 @@ const Index: React.FC<Props> = ({ user }) => {
   }
   return (
     <View>
+      <Button onClick={() => {
+          commonStore.setCategoryInfo({ ids: commonStore.categoryInfo.ids+1 })
+        }}
+      >add</Button>
       <MyDialog></MyDialog>
       <Button onClick={userInfoAction}>user info</Button>
       <Button openType='getPhoneNumber' onGetPhoneNumber={getPhoneNumber}>user phone</Button>

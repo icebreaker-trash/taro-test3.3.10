@@ -46,7 +46,7 @@ export function Toast(props: ToastProps) {
     id: defaultId,
     onCancel: () => { },
     onClose: () => { },
-    onSuccess: () => {}
+    onSuccess: () => { }
   })
 
   /* eslint-disable-next-line */
@@ -74,7 +74,7 @@ export function Toast(props: ToastProps) {
 
   const tShowListener = useCallback((toastOptions) => {
     watch(() => {
-      if(userStore.userInfo?.nickname){
+      if (userStore.userInfo?.nickname) {
         // 获取过用户信息
         setState(s => ({ ...s, phoneShow: true }))
       }
@@ -126,7 +126,7 @@ export function Toast(props: ToastProps) {
     on('toast_setDefaultOptions', tSetDftOptsListener)
 
     on('toast_resetDefaultOptions', tResetDftOptsListener)
-    
+
     return () => {
       off('toast_show', tShowListener)
       off('toast_clear', tClearListener)
