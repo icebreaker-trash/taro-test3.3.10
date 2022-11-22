@@ -107,7 +107,9 @@ export function useGetNextList() {
           </Empty.Description>
         </Empty>
       }
-      <View style={{ display: noData.current ? 'block' : 'none', color: '#ccc' }} className='no-data py-2 text-[24px] text-center w-full' >没有更多数据了~</View>
+      {
+        list.current.length ? <View style={{ display: noData.current ? 'block' : 'none', color: '#ccc' }} className='no-data py-2 text-[24px] text-center w-full' >没有更多数据了~</View> : ''
+      }
       {/* style={{ display: loading.current ? 'flex' : 'none' }} */}
       <Loading style={{ display: loading.current ? 'flex' : 'none' }} size='24px' >加载中...</Loading>
     </View>

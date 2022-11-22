@@ -4,7 +4,7 @@ import { StoreConfigNameCollect } from '@/config'
 import userStore from '@/store/modules/user'
 import $api from '@/api/index'
 import commonStore from '@/store/modules/common'
-import * as _ from "lodash"
+// import * as _ from "lodash"
 
 let a = 0
 interface LoginOb {
