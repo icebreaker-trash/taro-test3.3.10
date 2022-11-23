@@ -20,9 +20,9 @@ const config = {
   defineConstants: {
   },
   plugins: [
-    ['@tarojs/plugin-react-devtools'],
+    //['@tarojs/plugin-react-devtools'],
     // ['@tarojs/plugin-html', {}], // 解析html
-    ['taro-plugin-compiler-optimization'],
+    // ['taro-plugin-compiler-optimization'],
     // ['@dcasia/mini-program-tailwind-webpack-plugin/dist/taro', { }]
   ],
   // copy: {
