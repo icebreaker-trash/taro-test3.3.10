@@ -16,9 +16,9 @@ export default class Index extends Component {
 
   render () {
     return (
-      <View className='index bg-red-200'>
+      <View className='index '>
         {/* 样式不生效 要在tailwind.config.js 中保存一下才生效 */}
-        <Text className=' text-[#124785] bg-[yellow] text-[128rpx]'>Hello world!</Text>
+        <Text className='bg-[#dffadf] text-[88rpx] '>Hello world111!</Text>
       </View>
     )
   }
