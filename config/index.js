@@ -1,8 +1,9 @@
 import path from 'path'
-import { TaroWeappTailwindcssWebpackPluginV4 } from 'weapp-tailwindcss-webpack-plugin'
+import { TaroWeappTailwindcssWebpackPluginV5 } from 'weapp-tailwindcss-webpack-plugin'
 
 const config = {
   projectName: 'taro_thin_temp_ts',
+  compiler: 'webpack5',
   date: '2022-9-20',
   designWidth: 750,
   deviceRatio: {
@@ -24,13 +25,13 @@ const config = {
     ['taro-plugin-compiler-optimization'],
     // ['@dcasia/mini-program-tailwind-webpack-plugin/dist/taro', { }]
   ],
-  copy: {
-    patterns: [
-      { from: 'src/subPackage/static/common/', to: `dist/${process.env.TARO_ENV}/staticCommon/`, ignore: ['*.js'] }, // 指定需要 copy 的目录
-    ],
-    options: {
-    }
-  },
+  // copy: {
+  //   patterns: [
+  //     { from: 'src/subPackage/static/common/', to: `dist/${process.env.TARO_ENV}/staticCommon/`, ignore: ['*.js'] }, // 指定需要 copy 的目录
+  //   ],
+  //   options: {
+  //   }
+  // },
   sass: {
     resource: [path.resolve(__dirname, '..', 'src/static/scss/index.scss')]
   },
@@ -73,7 +74,7 @@ const config = {
         // },
         plugin: {
           install: {
-            plugin: TaroWeappTailwindcssWebpackPluginV4,
+            plugin: TaroWeappTailwindcssWebpackPluginV5,
             args: [
               {
                 // 注意这一行(不传默认 react)
