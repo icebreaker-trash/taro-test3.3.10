@@ -1,8 +1,8 @@
 {
   "miniprogramRoot": "./dist",
   "projectname": "taro_thin_temp_ts",
-  "description": "轻量taro模板",
-  "appid": "wx5e4f082fe81ab9aa",
+  "description": "",
+  "appid": "",
   "setting": {
     "urlCheck": true,
     "postcss": false,

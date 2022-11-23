@@ -1,7 +1,7 @@
 {
   "miniprogramRoot": "./",
   "projectname": "taro_thin_temp_ts",
-  "description": "轻量taro模板",
+  "description": "",
   "appid": "touristappid",
   "setting": {
     "urlCheck": true,

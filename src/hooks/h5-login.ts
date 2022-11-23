@@ -12,7 +12,7 @@ import { isAndroid, getQueryVar, setLoginState } from '@/utils/index'
 
 
 function handleAuthAction() {
-  const appid = "wx9e9b2df13d413fd9";
+  const appid = "";
   // eslint-disable-next-line no-restricted-globals
   let redirect_uri = isAndroid() ? location.href.split('#')[0] : window['entryUrl']
   redirect_uri = decodeURIComponent(redirect_uri);

@@ -89,13 +89,13 @@ const config = {
     devServer: {
       compress: true,
       // host: 'abc.cc.com',
-      host: 'wrjbs.szhuitianxia.com',
+      host: 'abc.cc.com',
       // 这个才是有效
-      public: 'wrjbs.szhuitianxia.com:80',
+      public: 'abc.cc.com:80',
       disableHostCheck: true,
       port: 80,
       open: false,
-      sockHost: 'wrjbs.szhuitianxia.com',
+      sockHost: 'abc.cc.com',
       sockPort: 80
     },
     router: {

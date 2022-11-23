@@ -70,13 +70,13 @@ import { wxMiniUpdate, handleError } from './utils'
 
 const App = ({ children }) => {
   handleError()
-  useEffect(() => {
-    if(Taro.ENV_TYPE.WEAPP === Taro.getEnv()){
-      wxMiniUpdate()
-    }
-    console.log(getCurrentInstance().router, 'getCurrentInstance().router')
-    login(getCurrentInstance().router)
-  }, [])
+  // useEffect(() => {
+  //   if(Taro.ENV_TYPE.WEAPP === Taro.getEnv()){
+  //     wxMiniUpdate()
+  //   }
+  //   console.log(getCurrentInstance().router, 'getCurrentInstance().router')
+  //   login(getCurrentInstance().router)
+  // }, [])
 
   useEffect(() => {
     // console.log(getCurrentInstance().router, 'getCurrentInstance().router')
