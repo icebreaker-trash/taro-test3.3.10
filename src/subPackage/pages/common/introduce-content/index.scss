@@ -1,0 +1,18 @@
+.introduce-page{
+  .c-item{
+    @apply flex justify-between mb-[60px] pr-[10px];
+    .img{
+      width: 200px;
+      height: 133px;
+      margin-right: 44px;
+    }
+    .name{
+      @apply text-[30px] font-bold mb-[10px];
+    }
+    .text{
+      text-align: justify;
+      line-height: 1.5;
+      font-size: 24px;
+    }
+  }
+}

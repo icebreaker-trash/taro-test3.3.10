@@ -4,6 +4,9 @@ module.exports = {
   },
   defineConstants: {
   },
+  plugins: [
+    ['taro-plugin-compiler-optimization']
+  ],
   mini: {},
   h5: {
     /**

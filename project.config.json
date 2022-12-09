@@ -1,31 +1,15 @@
 {
-  "miniprogramRoot": "dist/",
+  "miniprogramRoot": "./dist",
   "projectname": "taro_thin_temp_ts",
-  "description": "",
-  "appid": "wx6ffee4673b257014",
+  "description": "轻量taro模板",
+  "appid": "",
   "setting": {
     "urlCheck": true,
     "postcss": false,
     "minified": false,
     "es6": true,
     "newFeature": true,
-    "bigPackageSizeSupport": true,
-    "babelSetting": {
-      "ignore": [],
-      "disablePlugins": [],
-      "outputPath": ""
-    }
+    "bigPackageSizeSupport": true
   },
-  "compileType": "miniprogram",
-  "libVersion": "2.27.3",
-  "srcMiniprogramRoot": "dist/",
-  "packOptions": {
-    "ignore": [],
-    "include": []
-  },
-  "condition": {},
-  "editorSetting": {
-    "tabIndent": "insertSpaces",
-    "tabSize": 2
-  }
+  "compileType": "miniprogram"
 }

@@ -1,0 +1,22 @@
+.integral-shop-page{
+  .main{
+    .tab-box{
+      margin-top: 50px;
+      background: #F4F3F2;
+      position: sticky;
+      z-index: 9;
+      @apply flex items-center justify-between;
+      .item{
+        border: 1Px solid #999999;
+        width: 148px;
+        text-align: center;
+        @apply text-[25px] py-[12px] rounded-[28px];
+      }
+      .active{
+        color: #fff;
+        background-color: #917320;
+        border-color: #917320;
+      }
+    }
+  }
+}

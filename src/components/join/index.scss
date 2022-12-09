@@ -1,0 +1,34 @@
+.join-comp {
+  .content-box {
+    // background: linear-gradient(0deg, #F9F9F9 0%, #F1F1F1 100%);
+    background-color: #fff;
+    position: relative;
+    .header-box{
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      clip-path: polygon(0 0, 100% 0, 100% 140px, 0 100%);
+    }
+    .form{
+      .f-item{
+        border: 2Px solid #EEEEEE;
+        padding: 14px 30px;
+        margin-bottom: 30px;
+        @apply w-full rounded-[40px] flex items-center justify-between;
+        .name{
+          @apply text-[25px] text-[#666666] mr-[20px];
+        }
+        .input{
+          flex: 1;
+        }
+      }
+    }
+    .close{
+      font-size: 40px;
+      color: #fff;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: -63px;
+    }
+  }
+}

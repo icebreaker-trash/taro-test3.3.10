@@ -1,0 +1,15 @@
+.shop-detail-page {
+  .fixed-box {
+    .item{
+      @apply flex flex-col items-center justify-center p-[4px];
+    }
+    .fixed-btn {
+      line-height: 120px;
+      background-color: #9A7D2B;
+    }
+
+    .fixed-btn:nth-child(1) {
+      background-color: #E1C985;
+    }
+  }
+}

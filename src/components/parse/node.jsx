@@ -165,37 +165,37 @@ function Node({
     )
   }
   function renderImage(n, i) {
-    if ((opts[1] && !ctrl[i]) || ctrl[i] < 0) {
-      // 占位图
-      return <Image className='_img' style={n.attrs.style} src={ctrl[i] < 0 ? opts[2] : opts[1]} mode='widthFix' />
-    }
-    if (Taro.getEnv() === Taro.ENV_TYPE.WEB || Taro.getEnv() === Taro.ENV_TYPE.RN || Taro.getEnv() === Taro.ENV_TYPE.WEAPP) {
-      return <Image
-        id={n.attrs.id}
-        className={'_img ' + n.attrs.class}
-        style={(ctrl[i] == -1 ? 'display:none;' : '') +
-          'width:' + (ctrl[i] || 1) + 'px;height:1px;' +
-          n.attrs.style} src={n.attrs.src}
-        mode={n.h ? '' : 'widthFix'}
-        lazy-load={opts[0]} webp={n.webp}
-        show-menu-by-longpress={opts[3] && !n.attrs.ignore}
-        image-menu-prevent={!opts[3] || n.attrs.ignore}
-        onLoad={(e) => imgLoad(e, n, i)}
-        onError={(e) => mediaError(e, n)}
-        onClick={() => imgTap(n)}
-      />
-    }
-    // return <Image
-    //   id={n.attrs.id}
-    //   className={"_img " + n.attrs.class}
-    //   style={(ctrl[i] === -1 ? "display:none;" : "") + n.attrs.style}
-    //   src={n.attrs.src || (ctrl.load ? n.attrs["data-src"] : "")}
-    //   data-i={i}
-    //   fit={n.h ? '' : 'widthFix'}
-    //   onLoad={imgLoad}
-    //   onError={(e) => mediaError(e, n)}
-    //   onClick={() => imgTap(n)}
-    // />
+    // if ((opts[1] && !ctrl[i]) || ctrl[i] < 0) {
+    //   // 占位图
+    //   return <Image className='_img' style={n.attrs.style} src={ctrl[i] < 0 ? opts[2] : opts[1]} mode='widthFix' />
+    // }
+    // if (Taro.getEnv() === Taro.ENV_TYPE.WEB || Taro.getEnv() === Taro.ENV_TYPE.RN || Taro.getEnv() === Taro.ENV_TYPE.WEAPP) {
+    //   return <Image
+    //     id={n.attrs.id}
+    //     className={'_img ' + n.attrs.class}
+    //     style={(ctrl[i] == -1 ? 'display:none;' : '') +
+    //       'width:' + (ctrl[i] || 1) + 'px;height:1px;' +
+    //       n.attrs.style} src={n.attrs.src}
+    //     mode={n.h ? '' : 'widthFix'}
+    //     lazy-load={opts[0]} webp={n.webp}
+    //     show-menu-by-longpress={opts[3] && !n.attrs.ignore}
+    //     image-menu-prevent={!opts[3] || n.attrs.ignore}
+    //     onLoad={(e) => imgLoad(e, n, i)}
+    //     onError={(e) => mediaError(e, n)}
+    //     onClick={() => imgTap(n)}
+    //   />
+    // }
+    return <Image
+      id={n.attrs.id}
+      className={"_img " + n.attrs.class}
+      style={(ctrl[i] === -1 ? "display:none;" : "") + n.attrs.style}
+      src={n.attrs.src || (ctrl.load ? n.attrs["data-src"] : "")}
+      data-i={i}
+      mode={n.h ? '' : 'widthFix'}
+      onLoad={(e) => imgLoad(e, n, i)}
+      onError={(e) => mediaError(e, n)}
+      onClick={() => imgTap(n)}
+    />
   }
   function renderText(n) {
     return <Text user-select={n.us} decode>

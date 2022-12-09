@@ -1,4 +1,4 @@
-import Taro, { getCurrentPages, useRouter } from '@tarojs/taro'
+import Taro, { getCurrentPages, NodesRef, useRouter } from '@tarojs/taro'
 // import { wxLogin } from '@/hooks/index'
 import { StoreConfigNameCollect } from '@/config'
 import userStore from '@/store/modules/user'
@@ -67,7 +67,7 @@ export function getQueryVar(variable) {
   return (false);
 }
 
-export function click(fn, timer) {
+export function click(fn, timer?) {
   if (a) {
     Taro.showToast({
       title: '请勿重复点击',
@@ -487,3 +487,16 @@ export function wxMiniUpdate() {
     // 新版本下载失败
   })
 }
+
+export const selectorQueryClientRect = (
+  selector: string,
+): Promise<NodesRef.BoundingClientRectCallbackResult> =>
+  new Promise(resolve => {
+    const query = Taro.createSelectorQuery()
+    query
+      .select(selector)
+      .boundingClientRect((res: NodesRef.BoundingClientRectCallbackResult) => {
+        resolve(res)
+      })
+      .exec()
+  })

@@ -1,0 +1,44 @@
+.tabbar {
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  height: calc(#{$tabBarHeight} + constant(safe-area-inset-bottom));
+  height: calc(#{$tabBarHeight} + env(safe-area-inset-bottom));
+  background: #fff;
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0px -2px 18px 0px rgba(100,83,76,0.1);
+  .item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    .img-box {
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      .img {
+        margin-bottom: 4px;
+        width: 54px;
+        height: 54px;
+      }
+    }
+    .text {
+      font-size: 25px;
+      color: #828282;
+    }
+  }
+  .active {
+    .text {
+      color: #333;
+    }
+  }
+}

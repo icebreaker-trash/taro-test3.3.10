@@ -1,0 +1,23 @@
+.sale-customer-page {
+  .main-box {
+    .active {
+      color: #333333;
+      font-weight: bold;
+      position: relative;
+      &::after{
+        content: "";
+        width: 100%;
+        height: 5px;
+        background-color: #917320;
+        position: absolute;
+        bottom: -30px;
+        left: 0;
+      }
+    }
+    .list{
+      .item{
+        box-shadow: 0px 1px 7px 0px rgba(153,153,153,0.2);
+      }
+    }
+  }
+}

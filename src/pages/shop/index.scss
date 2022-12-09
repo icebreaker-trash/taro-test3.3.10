@@ -1,0 +1,21 @@
+.shop-page{
+  .swiper{
+    .custom-indicator{
+      left: 50%;
+      transform: translateX(-50%);
+      .active{
+        width: 58px;
+        border-radius: 11px;
+        background-color: #656362;
+        opacity: 1;
+      }
+    }
+  }
+  .hot-goods{
+    .scroll-view{
+      .item{
+        box-shadow: 0px 9px 16px 0px rgba(153,153,153,0.3);
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+.cart-page{
+  .title-box{
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 9;
+  }
+  .list{
+    .item{
+      @apply bg-white rounded-[18px] py-[46px] px-[26px] flex items-center justify-between;
+      .change-box{
+        border-radius: 50%;
+        border: 1Px solid #666666;
+        margin-right: 40px;
+        .img{
+          display: none;
+        }
+      }
+      .info{
+        @apply flex justify-between flex-1;
+        .img{
+          width: 165px;
+          height: 165px;
+          margin-right: 36px;
+        }
+      }
+    }
+    .active{
+      .change-box{
+        border: none;
+        .img{
+          display: block;
+        }
+      }
+    }
+  }
+  .fixed-box{
+    box-shadow: 0 2px 4px 8px rgba(0,0,0,0.1);
+  }
+}

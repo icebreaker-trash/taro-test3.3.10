@@ -1,9 +1,8 @@
 import path from 'path'
-import { TaroWeappTailwindcssWebpackPluginV5 } from 'weapp-tailwindcss-webpack-plugin'
+import { TaroWeappTailwindcssWebpackPluginV4 } from 'weapp-tailwindcss-webpack-plugin'
 
 const config = {
   projectName: 'taro_thin_temp_ts',
-  compiler: 'webpack5',
   date: '2022-9-20',
   designWidth: 750,
   deviceRatio: {
@@ -20,18 +19,18 @@ const config = {
   defineConstants: {
   },
   plugins: [
-    //['@tarojs/plugin-react-devtools'],
+    ['@tarojs/plugin-react-devtools'],
     // ['@tarojs/plugin-html', {}], // 解析html
     // ['taro-plugin-compiler-optimization'],
     // ['@dcasia/mini-program-tailwind-webpack-plugin/dist/taro', { }]
   ],
-  // copy: {
-  //   patterns: [
-  //     { from: 'src/subPackage/static/common/', to: `dist/${process.env.TARO_ENV}/staticCommon/`, ignore: ['*.js'] }, // 指定需要 copy 的目录
-  //   ],
-  //   options: {
-  //   }
-  // },
+  copy: {
+    patterns: [
+      { from: 'src/subPackage/static/common/', to: `dist/${process.env.TARO_ENV}/staticCommon/`, ignore: ['*.js'] }, // 指定需要 copy 的目录
+    ],
+    options: {
+    }
+  },
   sass: {
     resource: [path.resolve(__dirname, '..', 'src/static/scss/index.scss')]
   },
@@ -74,11 +73,14 @@ const config = {
         // },
         plugin: {
           install: {
-            plugin: TaroWeappTailwindcssWebpackPluginV5,
+            plugin: TaroWeappTailwindcssWebpackPluginV4,
             args: [
               {
                 // 注意这一行(不传默认 react)
-                framework: 'react' // 'vue2' / 'vue3'
+                framework: 'react', // 'vue2' / 'vue3'
+                customAttributes: {
+                  '*': [/Class/, /class/]
+                }
               }
             ]
           }
@@ -90,17 +92,17 @@ const config = {
     devServer: {
       compress: true,
       // host: 'abc.cc.com',
-      host: 'abc.cc.com',
+      host: 'wrjbs.szhuitianxia.com',
       // 这个才是有效
-      public: 'abc.cc.com:80',
+      public: 'wrjbs.szhuitianxia.com:80',
       disableHostCheck: true,
       port: 80,
       open: false,
-      sockHost: 'abc.cc.com',
+      sockHost: 'wrjbs.szhuitianxia.com',
       sockPort: 80
     },
     router: {
-      mode: 'browser' // 或者是 'browser' 'hash'
+      mode: 'hash' // 或者是 'browser' 'hash'
     },
     esnextModules: ["@taroify"],
     // publicPath: process.env.NODE_ENV === "development" ? "/" : "/taroify.com/h5",

@@ -1,0 +1,31 @@
+.serve-page{
+  .tab-box{
+    .active{
+      position: relative;
+      color: #333333;
+      font-weight: bold;
+      &::after{
+        content: "";
+        width: 100%;
+        height: 5px;
+        background-color: #917320;
+        position: absolute;
+        left: 0;
+        bottom: -20px;
+      }
+    }
+  }
+  .list{
+    box-sizing: border-box;
+    .item{
+      border-radius: 43px;
+      box-shadow: 0px 9px 16px 0px rgba(153,153,153,0.3);
+      .text{
+        line-height: 1.5;
+      }
+    }
+  }
+}
+page{
+  padding-bottom: 0 !important;
+}

@@ -1,0 +1,27 @@
+.nav-bar-comp{
+  background-color: #ffffff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 99;
+  overflow: hidden;
+  .nav-content{
+    box-sizing: content-box;
+    .left-box{
+      .back-icon{
+        font-size: 25px;
+      }
+    }
+    .title{
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+}
+.nav-white{
+  color: #fff;
+}
+.nav-black{
+  color: #000;
+}
